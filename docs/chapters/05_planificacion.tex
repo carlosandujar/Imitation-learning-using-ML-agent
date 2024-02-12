@@ -1,0 +1,183 @@
+%És bona idea començar el lliurament posant dades globals com, la data d’inici, la data de
+%finalització, la durada en hores (i dies), la data prevista per a la lectura del TFG, etc. També és
+%important informar del nombre d’hores que preveus treballar cada dia, fet que met interpretar el
+%Diagrama de GANTT.
+
+\chapter{Planificación temporal}\label{chapter:planificacion}
+
+El TFG consta de una carga lectiva de 18 créditos ECTS y, según la normativa académica de la FIB, cada crédito equivale a 30 horas de trabajo, por lo que se espera una dedicación de un total de 540 horas. Este proyecto empezó el 18 de septiembre de 2023 y se espera su finalización para el día 19 de enero de 2024, un total de 120 días en los que se espera una dedicación mínima de 4.5 horas por día.
+
+Con la finalidad de mantener una buena organización durante el trascurso de este proyecto, y terminar este proyecto en la fecha prevista, se propuso una planificación temporal donde se describen las distintas tareas en las que se descompone. 
+
+\section{Descripción de las tareas}
+
+Las tareas a realizar se han agrupado en bloques para distinguir a qué fase pertenecen. Se ha elaborado un resumen de tareas en la Tabla \ref{tab:resumen-tareas}, además de un diagrama de Gantt que se puede consultar en el Apéndice \ref{appendix:a}.
+
+\subsection{Gestión del proyecto [T1]}
+% Dedicación total: 100 horas
+
+Este bloque agrupa todas aquellas tareas relacionadas con la gestión del proyecto, engloba la definición del alcance del proyecto, su planificación, estimación de un presupuesto, informe de sostenibilidad, además de las reuniones semanales. En total, se ha estimado una duración de 100 horas.
+
+\begin{enumerate}
+    \item[-] Alcance [T1.1]: consiste en definir cuál es el objetivo de este proyecto, qué se va a desarrollar, a quién va dirigido y qué medios serán necesarios. Se estima una duración de 30 horas.
+    \item[-] Planificación [T1.2]: se propone una planificación inicial del proyecto, los recursos necesarios y una gestión del riesgo. Se estima una duración de 15 horas.
+    \item[-] Presupuesto [T1.3]: se realiza un presupuesto para calcular el coste necesario para llevar a cabo este proyecto. Se estima una duración de 7.5 horas.
+    \item[-] Informe de sostenibilidad [T1.4]: se analiza el impacto medioambiental, económico y social del proyecto. Se estima una duración de 7.5 horas.
+    \item[-] Reuniones [T1.5]: consiste en reuniones que se harán cada una o dos semanas con el director del proyecto, de aproximadamente 1 hora por sesión. Se estima una duración de 25 horas.
+    \item[-] Documentación [T1.6]: la documentación es una tarea que en realidad está implícita en todos los bloques, no solo del bloque de gestión del proyecto, ya que es un proceso que se hace en paralelo al resto. Por lo tanto, el tiempo estimado que se dedicará a ello queda presente en cada tarea.
+    \item[-] Presentación [T1.7]: se prepará una presentación del proyecto. Incluye el material de soporte para la presentación, el guion y ensayos. Se estima una duración de 15 horas.
+    
+\end{enumerate}
+
+\subsection{Trabajo previo [T2]}
+% Dedicación total: 20 horas?
+El bloque de trabajo previo define la preparación requerida antes de empezar con el desarrollo del proyecto, y se estima una duración total de 40 horas.
+
+
+\begin{enumerate}
+    \item[-] Estudio del estado del arte [T2.1]: se debe hacer un estudio de los distintos algoritmos de aprendizaje por refuerzo profundo (DRL) y aprendizaje por imitación (RI), en particular de aquellos que se puedan implementar con las herramientas que ofrece ML-Agents \cite{ml-agents-github}. Se hará una comparación entre estos algoritmos para analizar sus ventajas, desventajas y se analizará la viabilidad que tienen para este proyecto. Se estima una duración de 30 horas.
+    \item[-] Familiarización con ML-Agents [T2.2]: se hará un primer contacto con ML-Agents, que consistirá en la instalación y configuración del paquete en Unity, y probar algunos de los ejemplos disponibles. Se estima una duración de 10 horas.
+\end{enumerate}
+
+\subsection{Desarrollo del entorno virtual en Unity [T3]}
+% Dedicación total: 200 horas
+La fase de desarrollo del entorno virtual en Unity consiste en la preparación del \emph{Game Scene}, donde se llevarán a cabo las simulaciones de partidos de pádel. Dicha preparación se deberá hacer teniendo en cuenta los requerimientos de los entornos de entrenamiento mediante DRL y IL. Se estima una duración total de 180 horas.
+
+\begin{enumerate}
+    \item[-] Diseño [T3.1]: se planteará qué \emph{Game Objects} son necesarios, y cómo será la interacción entre estos. Se estima una duración de 40h. % 20h elementos del entorno: pista, pelota, jugadores, raquetas? + 20h game feeling, físicas?
+    \item[-] Preparación del entorno de entrenamiento DRL [T3.2]: se listarán los parámetros y requisitos necesarios para el entrenamiento mediante DRL. Se estima una duración de 30 horas. % 30h
+    \item[-] Preparación del entorno de entrenamiento IL [T3.3]: se listarán los parámetros y requisitos necesarios para el entrenamiento mediante IL. Se estima una duración de 30 horas. % 30h
+    \item[-] Implementación [T3.4]: se codificará el entorno virtual teniendo en cuenta el diseño y los requisitos ideados. Se estima una duración de 60 horas, ya que lo más probable es que acabe siendo un proceso iterativo donde se acabarán haciendo cambios. % 60h
+    \item[-] Testing [T3.5]: se comprobará que la implementación sea correcta y cumpla con las expectativas deseadas. Se estima una duración de 20 horas. % 20h?
+\end{enumerate}
+
+\newpage
+
+\subsection{Desarrollo de técnicas de aprendizaje por refuerzo profundo [T4]}
+% Dedicación total: 100 horas
+En este bloque se llevará a cabo el entrenamiento de agentes mediante DRL, así que dependerá del bloque T3. Se estima una duración total de 100 horas.
+\begin{enumerate}
+    \item[-] Diseño del modelo [T4.1]: se ideará un modelo de DRL para el entrenamiento de agentes. Se estima una duración de 40 horas.% 40h
+    \item[-] Implementación [T4.2]: se codificará el modelo diseñado. Se estima una duración de 40 horas. % 40h
+    \item[-] Testing [T4.3]: probar que el comportamiento de los agentes sea correcto y tenga un funcionamiento esperado. Se estima una duración de 20 horas.% 20h
+\end{enumerate}
+
+\subsection{Desarrollo de técnicas de aprendizaje por imitación [T5]}
+% Dedicación total: 100 horas
+En este bloque se llevará a cabo el entrenamiento de agentes mediante IL, por lo que también dependerá del bloque T3. Se estima una duración total de 100 horas.
+\begin{enumerate}
+    \item[-] Procesamiento de datos [T5.1]: se analizarán los datos de los que se dispone y se adaptarán a lo requerido en el entrenamiento de IL de ML-Agents. Se estima una duración de 20 horas.% 20h
+    \item[-] Diseño del modelo [T5.2]: se ideará un modelo de IL para el entrenamiento de agentes. Se estima una duración de 20 horas. % 20h
+    \item[-] Implementación [T5.3]: se codificará el modelo diseñado. Se estima una duración de 40 horas. % 40h
+    \item[-] Testing [T5.4]: probar que el comportamiento de los agentes sea correcto y tenga un funcionamiento esperado. Se estima una duración de 20 horas. % 20h
+\end{enumerate}
+
+\subsection{Desarrollo de la interfaz gráfica de usuario [T6]}
+% Dedicación total: 20 horas
+Una vez finalice el desarrollo del bloque principal del proyecto, compuesto por los bloques T3, T4 y T5, se integrará a la aplicación una interfaz gráfica de usuario. Este bloque se compone por el diseño, la implementación y el testing de la interfaz gráfica, y se estima una duración total de 20 horas.
+
+\begin{enumerate}
+    \item[-] Diseño [T6.1]: se ideará una interfaz estética, intuitiva y fácil de usar para el usuario final. Incluye el diseño de iconos y funcionalidades. Se estima una duración de 10 horas.  % 10h
+    \item[-] Implementación [T6.2]: después del diseño, se implementarán los iconos y las funcionalidades en la aplicación. Se estima una duración de 5 horas.% 5h
+    \item[-] Testing [T6.3]: se comprobará que tras la integración toda la aplicación funciona correctamente. Se estima una duración de 5 horas. % 5h
+\end{enumerate}
+
+\newpage
+
+\section{Recursos}
+
+\subsection{Recursos humanos}
+
+Los roles presentes en este proyecto son los de director de proyecto, analista de datos, programador, diseñador de la experiencia de usuario e ingeniero de control de calidad. A excepción del rol de analista de datos, en el que también participa el codirector Mohammadreza Javadiha, proporcionando datos de jugadores de pádel, todos los roles son asumidos por el autor del proyecto.
+
+\begin{enumerate}
+    \item[-] Jefe del proyecto: se encarga de la planificación y el desarrollo del proyecto, establecer una coordinación entre los miembros del equipo y escribir la documentación.
+    \item[-] Analista de datos: se encarga de recopilar, limpiar e interpretar conjuntos de datos, con la finalidad de extraer información útil para el desarrollo del proyecto.
+    \item[-] Programador: se encarga de la implementación de la aplicación.
+    \item[-] \emph{UX/UI Designer}: se encarga de asegurar que la interacción entre el usuario y el producto final sea sencilla e intuitiva.
+    \item[-] \emph{QA Engineer}: se encarga de asegurar que el producto final funcione correctamente y cumpla con las expectativas deseadas.
+\end{enumerate}
+
+\subsection{Recursos materiales}
+
+Los recursos materiales que se necesitan para este proyecto son:
+
+\begin{enumerate}
+    \item[-] Ordenador de sobremesa de altas prestaciones: equipo principal donde se llevarán a cabo todo o gran parte del desarrollo del proyecto.
+    \item[-] (Opcional) Ordenador portátil: equipo que se puede utilizar para realizar aquellas tareas relacionadas con la gestión del proyecto. De ser posible, también puede ser útil para agilizar el proceso de entrenamiento de agentes.
+    \item[-] Unity: motor gráfico que se utilizará como entorno de desarrollo para el proyecto.
+    \item[-] Gantter: herramienta web para la creación de diagramas de Gantt.
+    \item[-] Trello: aplicación que permite organizar tareas.
+    \item[-] Overleaf: editor de LaTeX colaborativo basado en la nube utilizado para la documentación.
+    \item[-] GitHub: plataforma utilizado para el control de versiones.
+    \item[-] Google Meet: aplicación utilizada para hacer reuniones en remoto.
+\end{enumerate}
+
+\begin{table}[H]
+    \centering
+    \resizebox{\textwidth}{!}{
+    \begin{tabular}{|>{\rowmac}c|>{\rowmac}c|>{\rowmac}c|>{\rowmac}c|>{\rowmac}c|>{\rowmac}c<{\clearrow}|}
+        \hline
+        \setrow{\bfseries} ID & Tarea & Tiempo & Dependencias & Recursos & Rol \\ \hline\hline
+        \setrow{\bfseries} T1 & Gestión del proyecto & 100h & - & - & - \\
+        \hline
+        T1.1 & Alcance & 30h & [] & PC, Overleaf & JP \\
+        T1.2 & Planificación & 15h & [T1.1] & PC, Overleaf, Gantter & JP \\
+        T1.3 & Presupuesto & 7.5h & [T1.2] & PC, Overleaf & JP \\
+        T1.4 & Informe de sostenibilidad & 7.5h & [T1.2] & PC, Overleaf & JP \\
+        T1.5 & Reuniones & 25h & [] & PC, Google Meet, Trello & JP \\
+        T1.6 & Documentación & - & [] & PC, Overleaf & JP \\
+        T1.7 & Presentación & 15h & [T1.6] & PC, Overleaf & JP \\
+        \hline
+        \setrow{\bfseries} T2 & Trabajo previo & 40h & - & - & -\\
+        \hline
+        T2.1 & Estudio del estado del arte & 30h & [] & PC & JP \\
+        T2.2 & Familiarización con ML-Agents & 10h & [T2.1] & PC & JP \\
+        \hline
+        \setrow{\bfseries} T3 & Desarrollo del entorno virtual en Unity & 180h & - & - & -\\
+        \hline
+        T3.1 & Diseño & 40h & [] & PC, Unity & JP \\
+        T3.2 & Preparación del entorno de entrenamiento DRL & 30h & [T3.1] & PC, Unity & P \\
+        T3.3 & Preparación del entorno de entrenamiento IL & 30h & [T3.1] & PC, Unity & P \\
+        T3.4 & Implementación & 60h & [T3.2, T3.3] & PC, Unity & P, QA \\
+        T3.5 & Testing & 20h & [T3.4] & PC, Unity & QA\\
+        \hline
+        \setrow{\bfseries} T4 & Desarrollo de técnicas de DRL & 100h & - & - & -\\
+        \hline
+        T4.1 & Diseño del modelo & 40h & [T3] & PC, Unity & JP \\
+        T4.2 & Implementación & 40h & [T4.1] & PC, Unity & P, QA \\
+        T4.3 & Testing & 20h & [T4.2] & PC, Unity & QA \\
+        \hline
+        \setrow{\bfseries} T5 & Desarrollo de técnicas de IL & 100h & - & - & -\\
+        \hline
+        T5.1 & Procesamiento de datos & 20h & [T3] & PC & AD \\
+        T5.2 & Diseño del modelo & 20h & [T5.1] & PC, Unity & JP \\
+        T5.3 & Implementación  & 40h & [T5.2] & PC, Unity & P, QA \\
+        T5.4 & Testing & 20h & [T5.3] & PC, Unity & QA \\
+        \hline
+        \setrow{\bfseries} T6 & Desarrollo de la interfaz gráfica de usuario & 20h & - & - & -\\
+        \hline
+        T6.1 & Diseño & 10h & [T4, T5] & PC, Unity & UX/UI \\
+        T6.2 & Implementación & 5h & [T6.1] & PC, Unity & P, QA \\
+        T6.3 & Testing & 5h & [T6.2] & PC, Unity & QA \\
+        \hline
+        \setrow{\bfseries} - & Total & 540h & - & - & -\\
+    \hline
+    \end{tabular}}
+    \caption[Resumen de las tareas con la duración, dependencias y recursos necesarios]{Resumen de las tareas con la duración, dependencias y recursos necesarios. Roles: JP - Jefe del proyecto, P - Programador, QA - \emph{QA Engineer}, UX/UI - \emph{UX/UI Designer}, AD - Analista de datos. (Elaboración propia)}
+    \label{tab:resumen-tareas}
+\end{table}
+
+\newpage
+
+\section{Gestión del riesgo}
+
+Además de la planificación, también es necesario hacer una previsión de los posibles riesgos que puedan surgir y proponer posibles alternativas para reducir el impacto de estos. Los riesgos más relevantes son los siguientes:
+
+\begin{enumerate}
+    \item[-] Recursos materiales insuficientes: en caso de no disponer de un ordenador de sobremesa con suficientes prestaciones, se puede optar por utilizar un equipo disponible en el laboratorio del grupo de investigación ViRVIG, ubicado en la Facultad de Matemáticas y Estadística de la UPC. Como último recurso, también existe la posibilidad de llevar a cabo, en particular, el entrenamiento de agentes virtuales en un equipo ofrecido por el director Carlos Andújar. Este riesgo, aun teniendo un impacto mínimo, supone una adición en el coste temporal debido al tiempo requerido para el desplazamiento de ida y vuelta, el cual es de un total de 2 horas por día.
+    \item[-] Costes en la obtención o insuficiencia de datos: si la obtención de datos de jugadores profesionales de pádel, destinados al aprendizaje por imitación, acaba siendo inviable, se podría optar añadir datos generados desde el propio entorno. En este caso, sería el propio autor el que, controlando un agente mediante unos controles básicos, grabaría datos representando un comportamiento inteligente destinados al entrenamiento de agentes. Esto supondría invertir más horas en las tareas T3.3 y T5.1, en particular 20 horas para la implementación de controles suficientemente complejos y 10 horas para la generación de datos manual, por lo que se puede considerar como un riesgo de impacto medio.
+    \item[-] Diseño de un entorno virtual demasiado específico: podría ocurrir que el entorno virtual de Unity diseñado, en una primera iteración, acabe siendo demasiado específico para el aprendizaje profundo por refuerzo, resultando en un diseño incompatible para el aprendizaje por imitación. La mejor manera de evitar este riesgo sería teniéndolo en cuenta desde el principio y adaptar un diseño más genérico que admita la implementación de ambos métodos. En el peor de los casos, haría falta un rediseño del entorno virtual, afectando a toda la aplicación debido a las dependencias con el bloque de tareas T3, y se podría producir un retraso de hasta 100 horas, por lo que se considerará como un riesgo de impacto alto.
+    \item[-] Entrenamiento de agentes demasiado ineficiente: a la hora de entrenar agentes, puede pasar que el modelo implementado sea demasiado complejo y, como consecuencia, requiera de demasiado tiempo de entrenamiento para obtener unos resultados mínimamente buenos. Para evitarlo, se debe analizar continuamente la evolución del proceso de entrenamiento, para evaluar si vale la pena seguir con el entrenamiento o sería mejor optar por hacer un ajuste de hiperparámetros, o directamente un cambio de diseño y/o modelo. A pesar de que estos cambios suelen ser pequeños, una ocurrencia reiterada podría suponer un aumento de tiempo considerable a largo plazo, el cual podría sumar un total de hasta 50 horas. Por este motivo, se considerará como un riesgo de impacto medio.
+\end{enumerate}
+

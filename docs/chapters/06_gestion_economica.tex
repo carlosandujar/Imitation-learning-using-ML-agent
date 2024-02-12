@@ -1,0 +1,212 @@
+\chapter{Gestión económica}\label{gestion_economica}
+
+En esta sección, tras haber propuesto una planificación inicial, se estima el coste asociado al desarrollo de este proyecto con la finalidad de analizar su viabilidad económica. En particular, se identifican los costes asociados al personal, a los espacios de trabajo y a los recursos materiales que se utilizarán. Además, se propone un plan de contingencia, una partida de imprevistos y los mecanismos de control de gestión para poder hacer frente a las desviaciones que puedan surgir durante el desarrollo.
+
+\section{Presupuesto}
+\subsection{Costes de personal}
+
+Los costes de personal consisten en el salario de los roles definidos previamente en la sección de planificación: jefe de proyecto, analista de datos, programador, \emph{UX/UI Engineer} y \emph{QA Engineer}. En la Tabla \ref{tab:coste-personal} se muestra cada rol con su respectivo salario bruto por hora, basado en la guía de mercado laboral de Indeed \cite{indeed}. También se estima el coste de la seguridad social, el cual se ha obtenido multiplicando el salario bruto por 1.3.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|>{\rowmac}c|>{\rowmac}c|>{\rowmac}c|>{\rowmac}c<{\clearrow}|}
+        \hline
+        \setrow{\bfseries} Rol & Salario bruto por hora & SS & Salario + SS \\ \hline\hline
+        Jefe de proyecto & 21.05 € & 6.32 € & 27.37 € \\ \hline
+        Analista de datos & 18.98 € & 5.69 € &  24.67 € \\ \hline
+        Programador & 14.36 € & 4.31 € & 18.67 € \\ \hline
+        UX/UI Engineer & 14.39 € & 4.32 € & 18.71 € \\ \hline
+        QA Engineer & 18.09 € & 5.43 € & 23.52 € \\
+    \hline
+    \end{tabular}
+    \caption[Costes de personal]{Costes de personal. (Elaboración propia)}
+    \label{tab:coste-personal}
+\end{table}
+
+En la Tabla \ref{tab:coste-personal-total} se detalla el coste de cada tarea de acuerdo a los salarios definidos. Se estima un coste total de 16,015.86 € en el personal.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|>{\rowmac}c|>{\rowmac}c|>{\rowmac}c|>{\rowmac}c|>{\rowmac}c<{\clearrow}|}
+        \hline
+        \setrow{\bfseries} ID & Tarea & Tiempo & Rol & Coste \\ \hline\hline
+        \setrow{\bfseries} T1 & Gestión del proyecto & 100h & - & 2,737.01 € \\
+        \hline
+        T1.1 & Alcance & 30h & JP & 821.10 € \\
+        T1.2 & Planificación & 15h & JP & 410.55 € \\
+        T1.3 & Presupuesto & 7.5h & JP & 205.28 € \\
+        T1.4 & Informe de sostenibilidad & 7.5h & JP & 205.28 € \\
+        T1.5 & Reuniones & 25h & JP & 684.25 € \\
+        T1.7 & Documentación & - & JP & - \\
+        T1.8 & Presentación & 15h & JP & 410.55 € \\
+        \hline
+        \setrow{\bfseries} T2 & Trabajo previo & 40h & - & 1,094.80 € \\
+        \hline
+        T2.1 & Estudio del estado del arte & 30h & JP & 821.10 € \\
+        T2.2 & Familiarización con ML-Agents & 10h & JP & 273.70 € \\
+        \hline
+        \setrow{\bfseries} T3 & Desarrollo del entorno virtual en Unity & 180h & -  & 5,216.80 € \\
+        \hline
+        T3.1 & Diseño & 40h & JP & 1,094.80 € \\
+        T3.2 & Preparación del entorno de entrenamiento DRL & 30h & P & 560.10 € \\
+        T3.3 & Preparación del entorno de entrenamiento IL & 30h & P & 560.10 € \\
+        T3.4 & Implementación & 60h & P, QA & 2,531.40 € \\
+        T3.5 & Testing & 20h & QA & 470.40 € \\
+        \hline
+        \setrow{\bfseries} T4 & Desarrollo de técnicas de DRL & 100h & - & 3,252.80 € \\
+        \hline
+        T4.1 & Diseño del modelo & 40h & JP & 1,094.80 € \\
+        T4.2 & Implementación & 40h & P, QA & 1,687.60 € \\
+        T4.3 & Testing & 20h & QA & 470.40 € \\
+        \hline
+        \setrow{\bfseries} T5 & Desarrollo de técnicas de IL & 100h & - & 3,198.80 € \\
+        \hline
+        T5.1 & Procesamiento de datos & 20h & AD & 493.40 € \\
+        T5.2 & Diseño del modelo & 20h & JP & 547.40 € \\
+        T5.3 & Implementación  & 40h & P, QA & 1,687.60 € \\
+        T5.4 & Testing & 20h & QA & 470.40 € \\
+        \hline
+        \setrow{\bfseries} T6 & Desarrollo de la interfaz gráfica de usuario & 20h & - & 515.65 € \\
+        \hline
+        T6.1 & Diseño & 10h & UX/UI & 187.10 € \\
+        T6.2 & Implementación & 5h & P, QA & 210.95 € \\
+        T6.3 & Testing & 5h & QA & 117.60 € \\
+        \hline
+        \setrow{\bfseries} - & Total & 540h & - & 16,015.86 € \\
+    \hline
+    \end{tabular}
+    \caption[Estimación de costes económicos por tarea]{Estimación de costes económicos por tarea. Roles: JP - Jefe del proyecto, P - Programador, QA - \emph{QA Engineer}, UX/UI - \emph{UX/UI Designer}, AD - Analista de datos. (Elaboración propia)}
+    \label{tab:coste-personal-total}
+\end{table}
+
+
+\subsection{Costes genéricos}
+
+Tal y como se ha especificado previamente, el espacio de trabajo será principalmente en el hogar durante toda la semana, y puntualmente en una biblioteca pública. Al ser espacios compartidos y situados en Barcelona, se estima un coste de 300 € mensuales de acuerdo a la tarifa de un espacio de \emph{coworking} en Barcelona, lo que sumaría un total de 1200 € para 4 meses.
+
+En cuanto a los costes de recursos \emph{software}, se ha optado por utilizar las versiones gratuitas siempre que sea posible. Por lo tanto, tal y como se puede observar en la Tabla \ref{tab:coste-software}, el único programa con costes será Gantter, el cual tendrá un coste total de 20 €.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|>{\rowmac}c|>{\rowmac}c|>{\rowmac}c|>{\rowmac}c<{\clearrow}|}
+        \hline
+        \setrow{\bfseries} Software & Coste mensual & Meses & Coste total \\ \hline\hline
+        Unity & 0.00 € & 4 & 0.00 € \\ \hline
+        Gantter & 5.00 € & 4 &  20.00 € \\ \hline
+        Trello & 0.00 € & 4 & 0.00 € \\ \hline
+        Overleaf & 0.00 € & 4 & 0.00 € \\ \hline
+        GitHub & 0.00 € & 4 & 0.00 € \\ \hline
+        Google Meet & 0.00 € & 4 & 0.00 € \\ \hline
+        \setrow{\bfseries} Total & - & - & 20.00 € \\
+    \hline
+    \end{tabular}
+    \caption[Costes de recursos software]{Costes de recursos software. (Elaboración propia)}
+    \label{tab:coste-software}
+\end{table}
+
+Finalmente, en la Tabla \ref{tab:coste-hardware} se estima el cálculo de costes de recursos \emph{hardware}, donde se hace un cálculo de la amortización mediante la siguiente fórmula:
+
+\begin{equation}\label{amortizacion}
+    A = \frac{P * Dp}{V * Dl * H}
+\end{equation}
+
+\noindent donde $A$ es la amortización, $P$ el precio del producto, $Dp$ la duración del proyecto, $V$ la vida útil, $Dl$ el número de días laborales en un año (se considera que hay 220 días laborales en un año) y $H$ el número de horas de trabajo al día.
+
+\begin{table}[H]
+    \centering
+    \resizebox{\textwidth}{!}{
+    \begin{tabular}{|>{\rowmac}c|>{\rowmac}c|>{\rowmac}c|>{\rowmac}c|>{\rowmac}c<{\clearrow}|}
+        \hline
+        \setrow{\bfseries} Hardware & Precio & Vida útil & Duración del proyecto & Amortización\\ \hline\hline
+        Ordenador de sobremesa & 1,500.00 € & 4 años & 540 horas & 115.05 € \\ \hline
+        Ordenador portátil & 2,300.00 € & 4 años & 540 horas & 176.42 € \\ \hline
+        \setrow{\bfseries} Total & - & - & - & 291.47 € \\
+    \hline
+    \end{tabular}}
+    \caption[Costes de recursos hardware]{Costes de recursos hardware. (Elaboración propia)}
+    \label{tab:coste-hardware}
+\end{table}
+
+\subsection{Contingencia}
+
+Debido a la posibilidad de que surjan complicaciones no esperadas durante el desarrollo del proyecto, lo cual puede encarecer el coste del trabajo, es importante añadir un sobrecoste que permita hacerles frente. Los valores típicos del nivel de contingencia en un proyecto de desarrollo de software se suelen situar entre el 10 \% y 20 \%, por lo que se ha decidio fijar un 15 \% de sobrecoste. El plan de contingencia de este proyecto se detalla en la Tabla \ref{tab:contingencia}.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|>{\rowmac}c|>{\rowmac}c|>{\rowmac}c<{\clearrow}|}
+        \hline
+        \setrow{\bfseries} Tipo & Coste & Contingencia \\ \hline\hline
+        Personal & 16,015.86 € & 2,402.38 € \\ \hline
+        Espacio & 1,200.00 € & 180.00 € \\ \hline
+        Software & 20.00 € & 3.00 € \\ \hline
+        Hardware & 291.47 € & 43.72 € \\ \hline
+        \setrow{\bfseries} Total & - & 2,629.10 € \\
+    \hline
+    \end{tabular}
+    \caption[Plan de contingencia con un sobrecoste de 15 \% por cada tipo]{Plan de contingencia con un sobrecoste de 15 \% por cada tipo. (Elaboración propia)}
+    \label{tab:contingencia}
+\end{table}
+
+\newpage
+
+\subsection{Imprevistos}
+
+Por último, también se calcula el coste necesario para afrontar los obstáculos e imprevistos que puedan surgir a lo largo de este proyecto. En la Tabla \ref{tab:coste-imprevisto} se cuantifica el riesgo y el coste que pueden suponer, y se explican a continuación:
+
+\begin{enumerate}
+    \item[-] Aumento del tiempo de desarrollo: este imprevisto recoge la mayoría de obstáculos que se han descrito previamente. En caso de necesitar más tiempo de desarrollo, se añadirá a la planificación inicial 20 horas de implementación y 10 horas de testing, lo cual supone un aumento de 1079 € en el coste total de personal. El riesgo de este imprevisto se ha cuantificado con un 30 \%, el cual es bastante elevado ya que durante el proyecto se trabajará con tecnologías que no se han utilizado previamente.
+    \item[-] Fallo en un dispositivo hardware: el riesgo de que se produzca algún fallo en los dispositivos hardware es bastante bajo, ya que se trata de dispositivos relativamente nuevos, por lo que se ha cuantificado un riesgo del 10 \%. En el caso de una avería en el ordenador de sobremesa, se buscaría reemplazar el componente defectuoso. Una avería en el ordenador portátil no sería muy grave, ya que su uso es opcional. 
+\end{enumerate}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|>{\rowmac}c|>{\rowmac}c|>{\rowmac}c|>{\rowmac}c<{\clearrow}|}
+        \hline
+        \setrow{\bfseries} Imprevisto & Coste & Riesgo & Coste total \\ \hline\hline
+        Aumento del tiempo de desarrollo & 1,079.00 € & 30 \% & 323.70 € \\ \hline
+        Fallo de ordenador de sobremesa & 1,500.00 € & 10 \% & 150.00 € \\ \hline
+        Fallo de ordenador portátil & 2,300.00 € & 10 \% & 230.00 € \\ \hline
+        \setrow{\bfseries} Total & - & - & 703.70 € \\
+    \hline
+    \end{tabular}
+    \caption[Estimación de costes y riesgos de los imprevistos]{Estimación de costes y riesgos de los imprevistos. (Elaboración propia)}
+    \label{tab:coste-imprevisto}
+\end{table}
+
+\subsection{Coste total}
+
+Una vez calculados los distintos costes del proyecto, en la Tabla \ref{tab:coste-total} se resume el coste total, el cual es de 20,860.13 €.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|>{\rowmac}c|>{\rowmac}c<{\clearrow}|}
+        \hline
+        \setrow{\bfseries} Tipo & Coste \\ \hline\hline
+        Personal & 16,015.86 € \\ \hline
+        Espacio & 1,200.00 € \\ \hline
+        Software & 20.00 € \\ \hline
+        Hardware & 291.47 € \\ \hline
+        Contingencia & 2,629.10 € \\ \hline
+        Imprevistos & 703.70 € \\ \hline
+        \setrow{\bfseries} Coste total & 20,860.13 € \\
+    \hline
+    \end{tabular}
+    \caption[Coste total del proyecto]{Coste total del proyecto. (Elaboración propia)}
+    \label{tab:coste-total}
+\end{table}
+
+\newpage
+
+\section{Control de gestión}
+
+Tras haber definido el presupuesto inicial, a continuación se definen los mecanismos para controlar las desviaciones que puedan surgir en relación al presupuesto, además de indicadores numéricos de cálculo que facilitan este control.
+
+Cada vez que una tarea finalice, se actualizará el presupuesto con las horas reales invertidas y se comparará con las horas estimadas. De cara a los imprevistos, también se tendrá en cuenta el gasto extra que haya sido necesario, y se contrastará con la previsión de imprevistos y la contingencia.
+
+Las métricas que se utilizarán para controlar las desviaciones son las siguientes:
+
+\begin{enumerate}
+    \item Desviación del coste = (coste estimado hora - coste real hora) × horas reales
+    \item Desviación del consumo = (horas estimadas - horas reales) × coste estimado hora
+    \item Desviación total de horas = horas estimadas - horas reales
+\end{enumerate}

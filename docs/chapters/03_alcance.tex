@@ -1,0 +1,48 @@
+\chapter{Alcance}\label{chapter:alcance}
+
+Definir el alcance de un proyecto es importante para establecer los límites de este desde el principio, para así evitar posibles contratiempos y poder cumplir con los plazos de las entregas. A continuación se definen los objetivos, los requerimientos funcionales y no funcionales, y los posibles obstáculos y riesgos del proyecto.
+
+\section{Objetivos}
+
+El objetivo principal de este trabajo es el diseño, desarrollo y evaluación de una aplicación que permita simular partidos de pádel en un entorno virtual. Se busca en especial una implementación mediante técnicas de aprendizaje automático, en concreto de aprendizaje por refuerzo y por imitación. Este objetivo se divide en los siguientes subobjetivos:
+\begin{enumerate}
+    \item Diseñar e implementar un entorno virtual que sea lo más fiel posible a un entorno real de pádel, donde se harán las simulaciones de partidos de pádel mediante agentes virtuales.
+    \item Investigar y aplicar distintas técnicas de aprendizaje por refuerzo para entrenar agentes virtuales, los cuales acabarán siendo capaces de jugar a pádel tras aprender las políticas que mejor les recompensan.
+    \item Investigar y aplicar distintas técnicas de aprendizaje por imitación para entrenar agentes virtuales, los cuales acabarán aprendiendo a jugar a pádel basándose en datos de jugadores profesionales, obtenidos mediante la aplicación de técnicas de visión por computador para el seguimiento de los jugadores en vídeos de partidos.
+    \item Evaluar qué técnicas dan los mejores resultados, teniendo especial consideración en cómo se comparan con el comportamiento de jugadores humanos. Este subobjetivo se irá aplicando de manera iterativa, ya que será necesario hacer una evaluación para cada técnica utilizada.
+\end{enumerate}
+
+\section{Requerimientos}
+
+\subsection{Requerimientos funcionales}
+
+Además de los requerimientos funcionales ya definidos en el objetivo, existen otros requisitos necesarios en el funcionamiento de la aplicación:
+
+\begin{enumerate}
+    \item[-] Durante una simulación, el usuario debe poder hacer cambios entre las distintas políticas aprendidas por los agentes, e indicar en todo momento qué políticas están siendo usadas (ya sean aquellas aprendidas mediante RL o mediante IL).
+    \item[-] El usuario debe poder interrumpir, reiniciar, pausar o continuar una simulación.
+\end{enumerate}
+
+\newpage
+
+\subsection{Requerimientos no funcionales}
+
+Los requerimientos no funcionales, es decir, aquellos requisitos que no tienen una relación directa con el funcionamiento de la aplicación, pero que se han de tener en cuenta durante su desarrollo, son los siguientes:
+
+\begin{enumerate}
+    \item[-] Usabilidad: La aplicación debe ser fácil de usar.
+    \item[-] Reusabilidad: la aplicacion debe ser fácilmente integrable en otros sistemas, como por ejemplo en un videojuego.
+\end{enumerate}
+
+\section{Obstáculos y riesgos}
+
+Anticipar las posibles dificultades que pueden surgir en un proyecto puede ayudar a minimizar el impacto que presentan. Los principales obstáculos y riesgos son los siguientes:
+
+\begin{enumerate}
+    \item[-] Falta de conocimiento: este trabajo parte de un conocimiento muy básico en el campo del aprendizaje por refuerzo y por imitación, por lo que será necesario invertir más tiempo a la investigación.
+    \item[-] Recursos insuficientes: al pretender desarrollar la aplicación en un ordenador personal, es posible que este no tenga la suficiente potencia para llevar a cabo el entrenamiento de agentes. Es importante disponer de alternativas para casos así, como por ejemplo tener acceso a un ordenador externo.
+    \item[-] Entrenamiento ineficiente: tener un ordenador con suficiente potencia no implica un entrenamiento más veloz, ya que se relaciona también con la complejidad del modelo implementado. Un modelo demasiado complejo aumenta considerablemente el tiempo necesario para obtener unos resultados mínimamente buenos.
+    \item[-] Costes en la obtención o insuficiencia de datos: el aprendizaje por imitación requiere conjuntos de datos de un tamaño considerable, por lo que es posible que los datos de los que se dispone en un principio sean insuficientes. La obtención de estos datos tampoco resulta trivial, por lo es una tarea bastante costosa.
+    \item[-] Diseño de un entorno virtual demasiado específico: teniendo en cuenta que el entrenamiento de agentes mediante técnicas de aprendizaje por refuerzo y por imitación se quiere realizar en un mismo entorno virtual, podría ocurrir que, en una primera iteración, este acabe siendo demasiado específico para uno de los dos métodos, lo cual supondría un retraso debido a la necesidad de rediseñar dicho entorno.
+    
+\end{enumerate}

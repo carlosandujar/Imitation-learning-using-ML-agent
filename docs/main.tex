@@ -1,0 +1,59 @@
+\RequirePackage[l2tabu,orthodox]{nag}
+
+\documentclass[footinclude=false,oneside,fontsize=11pt,paper=a4,bibliography=totoc,DIV=12,abstract=on,numbers=endperiod,listof=nochaptergap]{scrbook}
+
+\counterwithout{figure}{chapter}
+\counterwithout{table}{chapter}
+\counterwithout{equation}{chapter}
+
+\input{settings}
+
+\newcommand*{\getUniversidad}{Universitat Politècnica de Catalunya (UPC) - BarcelonaTech}
+\newcommand*{\getFacultad}{Facultat d'Informàtica de Barcelona (FIB)}
+\newcommand*{\getTitulo}{Entrenamiento de agentes virtuales para el aprendizaje de políticas óptimas de los jugadores durante un partido de pádel}
+\newcommand*{\getAutor}{Jia Long Ji Qiu}
+\newcommand*{\getDirector}{Carlos Andújar Gran (Departamento de Ciencias de la Computación)}
+\newcommand*{\getCodirector}{Mohammadreza Javadiha (Departamento de Ciencias de la Computación)}
+\newcommand*{\getTitulacion}{Grado en Ingeniería Informática (Computación)}
+\newcommand*{\getSubmissionLocation}{Barcelona}
+\pgfplotsset{compat=1.18}
+
+\begin{document}
+
+\selectlanguage{spanish}
+
+\frontmatter
+\pagenumbering{roman}
+
+\input{pages/title}
+%\includepdf[pages={1}]{chapters/portada.pdf}
+\microtypesetup{protrusion=false}
+%\input{pages/disclaimer}
+\input{pages/acknowledgements}
+\input{pages/abstract}
+\tableofcontents
+\listoffigures
+\listoftables
+\microtypesetup{protrusion=true}
+
+\mainmatter
+\pagenumbering{arabic} % Switch to Arabic page numbers for the main content
+
+\include{chapters/01_introduccion}
+\input{chapters/02_justificacion}
+\input{chapters/03_alcance}
+\input{chapters/04_metodologia}
+\input{chapters/05_planificacion}
+\input{chapters/06_gestion_economica}
+\input{chapters/07_sostenibilidad}
+\input{chapters/08_estudio_previo}
+\input{chapters/09_desarrollo}
+\input{chapters/10_experimentacion}
+\input{chapters/11_planificacion_final}
+\input{chapters/12_conclusiones}
+
+\pagestyle{plain}
+\printbibliography[title = {Referencias}]
+
+\input{pages/appendix}
+\end{document}

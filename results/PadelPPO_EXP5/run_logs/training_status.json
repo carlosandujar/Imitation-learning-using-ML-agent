@@ -1,0 +1,48 @@
+{
+    "PadelAgent": {
+        "checkpoints": [
+            {
+                "steps": 499972,
+                "file_path": "results\\PadelPPO_EXP5\\PadelAgent\\PadelAgent-499972.onnx",
+                "reward": 1.9855713418551855,
+                "creation_time": 1705379168.4329808,
+                "auxillary_file_paths": [
+                    "results\\PadelPPO_EXP5\\PadelAgent\\PadelAgent-499972.pt"
+                ]
+            },
+            {
+                "steps": 999954,
+                "file_path": "results\\PadelPPO_EXP5\\PadelAgent\\PadelAgent-999954.onnx",
+                "reward": 10.129843656439334,
+                "creation_time": 1705381403.7446911,
+                "auxillary_file_paths": [
+                    "results\\PadelPPO_EXP5\\PadelAgent\\PadelAgent-999954.pt"
+                ]
+            },
+            {
+                "steps": 1000048,
+                "file_path": "results\\PadelPPO_EXP5\\PadelAgent\\PadelAgent-1000048.onnx",
+                "reward": 10.197884519283589,
+                "creation_time": 1705381403.9216914,
+                "auxillary_file_paths": [
+                    "results\\PadelPPO_EXP5\\PadelAgent\\PadelAgent-1000048.pt"
+                ]
+            }
+        ],
+        "elo": 1529.2938928469532,
+        "final_checkpoint": {
+            "steps": 1000048,
+            "file_path": "results\\PadelPPO_EXP5\\PadelAgent.onnx",
+            "reward": 10.197884519283589,
+            "creation_time": 1705381403.9216914,
+            "auxillary_file_paths": [
+                "results\\PadelPPO_EXP5\\PadelAgent\\PadelAgent-1000048.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.29.0",
+        "torch_version": "1.7.1+cu110"
+    }
+}

@@ -1,0 +1,160 @@
+\PassOptionsToPackage{table,svgnames,dvipsnames}{xcolor}
+
+\usepackage[page]{appendix}
+
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+
+\algnewcommand\algorithmicforeach{\textbf{for each}}
+\algdef{S}[FOR]{ForEach}[1]{\algorithmicforeach\ #1\ \algorithmicdo}
+
+\edef\restoreparindent{\parindent=\the\parindent\relax}
+\usepackage{parskip}
+\restoreparindent
+
+\usepackage{caption}
+%\usepackage{subcaption}
+
+\usepackage{subfig}
+
+\usepackage{float}
+\usepackage{fancyhdr}
+
+\usepackage{etoolbox}
+\renewcommand\thefigure{\arabic{figure}}
+\renewcommand{\theequation}{\arabic{equation}}
+\renewcommand\thetable{\arabic{table}}
+
+\renewcommand*{\figureformat}{%
+  \figurename~\thefigure%
+%  \autodot% DELETED
+}
+
+\usepackage{tabularx}
+\newcommand\setrow[1]{\gdef\rowmac{#1}#1\ignorespaces}
+\newcommand\clearrow{\global\let\rowmac\relax}
+\clearrow
+
+
+\renewcommand*{\tableformat}{%
+  \tablename~\thetable%
+%  \autodot% DELETED
+}
+
+
+% Clear the default header content
+\fancyhead{}
+\renewcommand{\headrulewidth}{0pt} % Remove header line
+
+\pagestyle{fancy}
+
+\usepackage[hmargin={2.54cm, 2.54cm}, vmargin={2.54cm,2.54cm}]{geometry}
+
+%\renewcommand{\chapterheadstartvskip}{}
+
+\RedeclareSectionCommand[
+  beforeskip=0pt,
+  afterskip=5pt,
+  afterindent=false% <- added
+  ]{chapter}
+
+\newenvironment{abstract}{}{}
+\usepackage{abstract}
+
+\newenvironment{acknowledgements}{%
+  \renewcommand{\abstractname}{Agradecimientos}% Rename Abstract to Acknowledgements
+  \begin{abstract}
+}{%
+  \end{abstract}
+}
+
+\usepackage[spanish, english, catalan]{babel}
+\addto\captionsspanish{
+  \renewcommand{\contentsname}{Índice}
+  \renewcommand{\figurename}{Figura}
+  \renewcommand{\tablename}{Tabla}
+  \renewcommand{\listtablename}{Índice de tablas}
+  \renewcommand{\bibname}{Referencias}
+  \renewcommand\appendixname{Apéndice}
+  \renewcommand\appendixpagename{Apéndices}
+}
+\usepackage{amsmath}
+% no accents in math operators
+\unaccentedoperators
+
+\usepackage{lipsum}
+%   Reduce the margin of the summary:
+\def\changemargin#1#2{\list{}{\rightmargin#2\leftmargin#1}\item[]}
+\let\endchangemargin=\endlist 
+
+%   Generate the environment for the abstract:
+\newcommand\summaryname{Abstract}
+\newenvironment{Abstract}%
+    {\small\begin{center}%
+    \bfseries{\summaryname} \end{center}}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[sc]{mathpazo}
+\usepackage[autostyle]{csquotes}
+\usepackage[%
+  backend=biber,
+  url=true,
+  style=numeric, % alphabetic, numeric
+  sorting=none, % default == nty, https://tex.stackexchange.com%/questions/51434/biblatex-citation-order
+  maxnames=4,
+  minnames=3,
+  maxbibnames=99,
+  giveninits,
+  uniquename=init]{biblatex} % TODO: adapt citation style
+\addbibresource{bibliography.bib} 
+\DeclareFieldFormat{urldate}{visted at #1}
+
+\usepackage{graphicx}
+\usepackage{scrhack} % necessary for listings package
+\usepackage{listings}
+\usepackage{lstautogobble}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepackage{booktabs} % for better looking table creations, but bad with vertical lines by design (package creator despises vertical lines)
+\usepackage[final]{microtype}
+\usepackage{caption}
+\usepackage[hidelinks]{hyperref} % hidelinks removes colored boxes around references and links
+\usepackage{ifthen} % for comparison of the current language and changing of the thesis layout
+\usepackage{pdftexcmds} % string compare to work with all engines
+\usepackage{paralist} % for condensed enumerations or lists
+\usepackage{subfig} % for having figures side by side
+\usepackage{siunitx} % for physical accurate units and other numerical presentations
+%\usepackage{multirow} % makes it possible to have bigger cells over multiple rows in a table
+\usepackage{array} % different options for table cell orientation
+\usepackage{makecell} % allows nice manual configuration of cells with linebreaks in \thead and \makecell with alignments
+\usepackage{pdfpages} % for including multiple pages of pdfs
+\usepackage{adjustbox} % can center content wider than the \textwidth
+\usepackage{tablefootnote} % for footnotes in tables as \tablefootnote
+\usepackage{threeparttable} % another way to add footnotes as \tablenotes with \item [x] <your footnote> after setting \tnote{x} 
+
+
+% https://tex.stackexchange.com/questions/42619/x-mark-to-match-checkmark
+\usepackage{amssymb}% http://ctan.org/pkg/amssymb
+\usepackage{pifont}% http://ctan.org/pkg/pifont
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+
+\setkomafont{disposition}{\normalfont\bfseries} % use serif font for headings
+\linespread{1.05} % adjust line spread for mathpazo font
+
+% Add table of contents to PDF bookmarks
+\BeforeTOCHead[toc]{{\cleardoublepage\pdfbookmark[0]{\contentsname}{toc}}}
+
+% Settings for search order of pictures
+\graphicspath{
+    {logos/}
+    {figures/}
+}
+
+% Set up hyphenation rules for the language package when mistakes happen
+\babelhyphenation[english]{
+an-oth-er
+ex-am-ple
+}

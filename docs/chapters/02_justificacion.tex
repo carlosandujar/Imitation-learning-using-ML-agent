@@ -1,0 +1,47 @@
+\chapter{Justificación}\label{chapter:justificacion}
+
+Dentro del conjunto de técnicas de aprendizaje automático, la realidad es que la popularidad de las áreas de RL y IL no es tan elevada como otras como el aprendizaje profundo. De la misma manera, el pádel no es un deporte tan popular como otros gigantes como el fútbol, el baloncesto o el tenis. Por estas razones, resulta difícil encontrar recursos que combinen directamente ambas cosas. Aun así, existen soluciones y herramientas que se pueden adaptar al dominio de este proyecto, de las cuales se hablan a continuación.
+
+\section{Estudio de soluciones existentes}
+
+\subsection{Motor gráfico}
+
+Para el diseño y desarrollo del entorno virtual de pádel se requiere un motor gráfico, un conjunto de herramientas para desarrollar aplicaciones visuales, es decir, renderizar escenas 2D o 3D. Además, es necesario que este motor sea compatible con otras funcionalidades, como por ejemplo un motor físico o un soporte para la integración de agentes virtuales.
+
+Los motores gráficos más populares en la actualidad son \emph{Unity} y \emph{Unreal Engine}, los cuales ofrecen prestaciones similares y se diferencian principalmente en el lenguaje de programación utilizado para programar \emph{scripts}: \emph{C\#} en el caso de \emph{Unity} y \emph{C++} en el caso de \emph{Unreal Engine}.
+
+Entre estos dos motores gráficos, el motor por el que se ha optado finalmente es el de Unity, ya que como se verá más adelante, ofrece la herramienta \emph{Unity Machine Learning Agents Toolkit} (ML-Agents) \parencite{ml-agents-github}, un proyecto de código abierto que permite utilizar juegos y simulaciones como entornos para entrenar agentes inteligentes, lo cual cumple con lo requerido para este trabajo. 
+
+\subsection{Entorno de entrenamiento}
+
+Según un estudio realizado por el equipo detrás de ML-Agents \parencite{juliani2020}, en el panorama de simuladores, entornos y plataformas se puede diferenciar cuatro categorías:
+
+\begin{enumerate}
+    \item[-] La categoría \emph{Single Environment} describe entornos fijos que actúan como cajas negras desde la perspectiva de un agente.
+    \item[-] La categoría \emph{Environment Suite} consiste en conjuntos de entornos agrupados y que se utilizan normalmente para hacer pruebas de rendimiento de un algoritmo o método en algunas dimensiones de interés.
+    \item[-] La categoría \emph{Domain-specific Platform} define plataformas que permiten la creación de tareas a realizar dentro de un dominio en específico.
+    \item[-] Por último, la categoría \emph{General Platform} consiste en una plataforma que permite a los usuarios crear entornos con tareas y interacciones visuales, físicas y sociales arbitrariamente complejos. En principio, dichas plataformas permiten definir cualquier entorno de investigación de inteligencia artificial.
+    
+\end{enumerate}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{cccc}
+        \hline
+        Single Env & Env Suite & Domain-specific Platform & General Platform \\
+        \hline
+        Cart Pole & ALE & MuJoCo & Unity \& ML-Agents \\
+        Mountain Car & DMLab-30 & DeepMind Lab &  \\
+        Obstacle Tower & Hard Eight & Project Malmo &  \\
+        Pitfall! & AI2Thor & VizDoom &  \\
+        CoinRun & OpenAI Retro & GVGAI &  \\
+        Ant & DMControl & PyBullet & \\
+         & ProcGen & & \\
+    \hline
+    \end{tabular}
+    \caption[Taxonomía de simuladores basada en la flexibilidad de la especificación del entorno, con ejemplos para cada categorí]{Taxonomía de simuladores basada en la flexibilidad de la especificación del entorno, con ejemplos para cada categoría. (Fuente: \parencite{juliani2020})}
+    \label{taxonomia-entornos}
+\end{table}
+
+Entre estas cuatro categorías, la categoría de \emph{General Platform} es la que mejor se adapta a las necesidades de este proyecto, ya que es necesario un alto grado de flexibilidad a la hora de diseñar el entorno de entrenamiento para agentes, pues se busca hacer una representación fiel del pádel. Por ello, se utilizará ML-Agents para el entrenamiento de los agentes virtuales.
+
