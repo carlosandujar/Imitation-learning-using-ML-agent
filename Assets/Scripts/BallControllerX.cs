@@ -465,7 +465,6 @@ public class BallControllerX : MonoBehaviour
             zTarget *= -1;
             xTarget *= -1;
         }
-
         float zStart = ballRb.transform.localPosition.z;
         float xStart = ballRb.transform.localPosition.x;
         float yStart = ballRb.transform.localPosition.y;
