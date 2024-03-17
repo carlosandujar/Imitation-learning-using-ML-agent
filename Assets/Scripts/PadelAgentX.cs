@@ -97,38 +97,37 @@ public class PadelAgentX : Agent
     public void MoveAgent(ActionSegment<int> discreteActions)
     {
 
-        var forwardAxis = discreteActions[0];
-        var rightAxis = discreteActions[1];
+        var targetX = discreteActions[0];
+        var targetZ = discreteActions[1];
         var xGrid = discreteActions[2];
         var zGrid = discreteActions[3];
         var hitType = discreteActions[4];
 
-        Vector3 xDirection = Vector3.zero;
-        Vector3 zDirection = Vector3.zero;
+        float xTarget = -2 * (10f / 6) + (10f / 6) * targetX;
+        float zTarget = - (10f / 6) * targetZ;
 
-        switch (forwardAxis)
+        if (team == Team.T2)
         {
-            case 1:
-                zDirection = transform.forward * speed;
-                break;
-            case 2:
-                zDirection = -transform.forward * speed;
-                break;
+            zTarget *= -1;
+            xTarget *= -1;
         }
+        Debug.Log("targetX:" + targetX);
+        Debug.Log("targetZ:" + targetZ);
+        Vector3 targetPos = new Vector3(xTarget,0f, zTarget);
+        Vector3 posPlayer = transform.localPosition;
 
-        switch (rightAxis)
-        {
-            case 1:
-                xDirection = transform.right * speed;
-                break;
-            case 2:
-                xDirection = -transform.right * speed;
-                break;
-        }
+        Vector3 direction = targetPos - posPlayer;
+        float magnitude = direction.magnitude;
+        direction /= magnitude;
+        float x = Mathf.Clamp(direction.x, -1, 1);
+        float z = Mathf.Clamp(direction.z, -1, 1);
 
-        characterController.Move((xDirection + zDirection) * Time.deltaTime);
+        Vector3 clampedDirection = new Vector3(x, 0f, z);
+
+        characterController.Move(clampedDirection * speed * Time.deltaTime);
 
         float hitHeight = 0;
+        float xAceleration = 0;
 
         bool hitBall = true;
         switch (hitType)
@@ -153,15 +152,35 @@ public class PadelAgentX : Agent
                     hitBall = false;
                 }
                 break;
+            // curva++ izquierda 
+            case 4:
+                hitHeight = 3;
+                xAceleration = -2;
+                break;
+            // curva++ derecha 
+            case 5:
+                hitHeight = 3;
+                xAceleration = 2;
+                break;
+            // curva++ izquierda 
+            case 6:
+                hitHeight = 3;
+                xAceleration = -3;
+                break;
+            // curva++ derecha 
+            case 7:
+                hitHeight = 3;
+                xAceleration = 3;
+                break;
         }
         if (hitBall)
         {
-            Vector3 hitForce = environmentController.CalculateForce(team, hitHeight, xGrid, zGrid);
+            Vector3 hitForce = environmentController.CalculateForce(team, hitHeight, xGrid, zGrid, xAceleration);
 
-            if (ballOnRange && ballRb.transform.localPosition.y > 0.25 && environmentController.GetLastHitByTeam() != team && hitForce != Vector3.zero && !environmentController.BallIsLocked() && !environmentController.PointJustGiven())
+            if (ballOnRange && ballRb.transform.localPosition.y > 0.25 && environmentController.GetLastHitByTeam() != team && hitForce != Vector3.zero && !environmentController.PointJustGiven() && !environmentController.BallIsLocked())
             {
                 environmentController.AddTeamRewards(team, EnvironmentControllerX.HittingBallReward);
-                environmentController.HitBall(team, hitForce);
+                environmentController.HitBall(team, hitForce, xAceleration);
             }
         }
     }

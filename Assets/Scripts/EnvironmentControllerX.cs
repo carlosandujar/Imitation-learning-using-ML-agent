@@ -130,9 +130,9 @@ public class EnvironmentControllerX : MonoBehaviour
         ballController.ServeBall(team, side, force);
     }
 
-    public void HitBall(Team team, Vector3 force)
+    public void HitBall(Team team, Vector3 force, float xAceleration)
     {
-        ballController.HitBall(team, force);
+        ballController.HitBall(team, force, xAceleration);
     }
 
     public Vector3 GetBallLocalPosition()
@@ -162,9 +162,9 @@ public class EnvironmentControllerX : MonoBehaviour
         return ballController.PointJustGiven();
     }
 
-    public Vector3 CalculateForce(Team team, float yMax, float xGrid, float zGrid)
+    public Vector3 CalculateForce(Team team, float yMax, float xGrid, float zGrid, float xacceleration)
     {
-        return ballController.CalculateForce(team, yMax, xGrid, zGrid);
+        return ballController.CalculateForce(team, yMax, xGrid, zGrid, xacceleration);
     }
 
     public void ResetScene()
@@ -206,9 +206,9 @@ public class EnvironmentControllerX : MonoBehaviour
         trajectoryController.ClearTrajectory();
     }
 
-    public void SimulateTrajectory(GhostBall ghostBallPrefab, Vector3 pos, Vector3 velocity, Team hitByTeam)
+    public void SimulateTrajectory(Vector3 pos, Vector3 velocity, Team hitByTeam)
     {
-        trajectoryController.SimulateTrajectory(ghostBallPrefab, pos, velocity, hitByTeam);
+        trajectoryController.SimulateTrajectory(pos, velocity, hitByTeam);
     }
 
     public void ClearKeyPositions()
@@ -269,5 +269,10 @@ public class EnvironmentControllerX : MonoBehaviour
     public void SendCoachedMovement(PlayerId playerId, int[] movement)
     {
         agentsController.SendCoachedMovement(playerId, movement);
+    }
+
+    public Vector3 GetCenterField()
+    {
+        return ballController.centerField;
     }
 }

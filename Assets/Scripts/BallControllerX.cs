@@ -6,18 +6,39 @@ using UnityEngine;
 
 public class BallControllerX : MonoBehaviour
 {
-    private Rigidbody ballRb;
-    public EnvironmentControllerX environmentController;
-    private Vector3 initialPosition;
 
+    public EnvironmentControllerX environmentController;
+
+    //Hits 
     private bool hasToBounceOnService;
     private Team lastHitByTeam;
     private Side serverSide;
     private bool bouncedFloor, bouncedWall;
     private Vector3 bouncingPosition;
 
-    private bool ballIsLocked = false;
-    private bool pointJustGiven = false;
+    //Speed and position 
+    private Vector3 initialPosition;
+    private Rigidbody ballRb;
+    public float CoefficientRestitution = 0.76f;
+    private float tiempoAcumulado = 0f;
+    private bool Gravity;
+    public float xAcceleration; // aceleration on x axis
+    [SerializeField] private Vector3 recive_force_Position;
+    [SerializeField] private float xTarget, zTarget;
+    [SerializeField] private Vector3 velocityTraject;
+    [SerializeField] private Vector3 velocityNow;
+
+    //Padel Field
+    public Vector3 centerField;
+    public float radiusBall = 0.25f;
+    private float netHeight = 1f;
+    public Transform T1_1,T1_2,T2_1,T2_2;
+    private float limX_neg;
+    private float limX_pos;
+    private float limZ_neg;
+    private float limZ_pos;
+    private float heightPlayer = 1.75f;
+
 
     private int timesBouncedOnFloor;
     private bool isServeBall;
@@ -29,6 +50,10 @@ public class BallControllerX : MonoBehaviour
     public TextMeshProUGUI BallInfoText;
 
     private float timesBallHit = 0;
+    private bool ballIsLocked = false;
+    private bool pointJustGiven = false;
+    private bool checkLocked = false;
+    private bool trajectCalc;
 
     public float GetTimesBallHit()
     {
@@ -54,33 +79,55 @@ public class BallControllerX : MonoBehaviour
 
     void Start()
     {
+        centerField = GameObject.Find("Net").transform.position;
+        limX_neg = centerField.x - 5f;
+        limX_pos = centerField.x + 5f;
+        limZ_neg = centerField.z - 10f;
+        limZ_pos = centerField.z + 10f;
         ballRb = GetComponent<Rigidbody>();
-        ballRb.useGravity = false;
         hasToBounceOnService = false;
         bouncedFloor = false;
         bouncedWall = false;
         timesBouncedOnFloor = 0;
+        Gravity = false;
+        trajectCalc = false;
         trailRenderer = GetComponent<TrailRenderer>();
         initialPosition = new Vector3(2.5f, 1, -7);
+        recive_force_Position = new Vector3(2.5f, 1, -7);
     }
 
     private float hitTimeMargin = 0;
     private float pointTimeMargin = 0;
-
     private void FixedUpdate()
     {
         /*
-         * Necessary for sync. Without locking the ball, a player might hit the ball while the trajectory
-         * is being calculated
-         */
-        if (ballIsLocked)
+        * Necessary for sync. Without locking the ball, a player might hit the ball while the trajectory
+        * is being calculated
+        */
+
+        if(trajectCalc)
         {
-            hitTimeMargin += Time.fixedDeltaTime;
-            if (hitTimeMargin > 0.1)
+            CheckCollision();
+
+            tiempoAcumulado += Time.fixedDeltaTime;
+            velocityNow.x = velocityTraject.x + xAcceleration * tiempoAcumulado;
+            
+            velocityNow.z = velocityTraject.z;
+            float X = recive_force_Position.x + velocityTraject.x * tiempoAcumulado + 0.5f * xAcceleration * Mathf.Pow(tiempoAcumulado, 2);
+            float Y;
+            if (Gravity)
             {
-                ballIsLocked = false;
-                hitTimeMargin = 0;
+                velocityNow.y = velocityTraject.y + (-9.8f) * tiempoAcumulado;
+                Y = recive_force_Position.y + velocityTraject.y * tiempoAcumulado + 0.5f * Physics.gravity.y * Mathf.Pow(tiempoAcumulado, 2);
             }
+            else
+            {
+                velocityNow.y = velocityTraject.y;
+                Y = recive_force_Position.y + velocityTraject.y;
+            }
+            float Z = recive_force_Position.z + velocityTraject.z * tiempoAcumulado;
+            ballRb.transform.localPosition = new Vector3(X, Y, Z);
+
         }
         /*
          * Points are given with delay: if all positions are updated within the same Update(), some weird collisions can occur
@@ -98,9 +145,11 @@ public class BallControllerX : MonoBehaviour
                 pointTimeMargin = 0;
             }
         }
+
     }
 
     void Update()
+
     {
         if (transform.position.y < -1)
         {
@@ -242,64 +291,134 @@ public class BallControllerX : MonoBehaviour
         return y > 3 || (z >= -6 && z <= 6);
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void CheckCollision()
     {
-        string tag = collision.gameObject.tag;
-        if (tag == "PlayerT1")
+        Vector3 posBall = ballRb.transform.localPosition;
+        Vector3 collisionNormal = new Vector3();
+        string tag ="";
+        float PlayerRadio = 0.4f;
+        float distanceNet = Vector3.Distance(new Vector3(0, 0, posBall.z), new Vector3(0, 0, centerField.z));
+        float distanceT1_1 = Vector2.Distance(new Vector2(posBall.x, posBall.z), new Vector2(T1_1.localPosition.x, T1_1.localPosition.z));
+        float distanceT1_2 = Vector2.Distance(new Vector2(posBall.x, posBall.z), new Vector2(T1_2.localPosition.x, T1_2.localPosition.z));
+        float distanceT2_1 = Vector2.Distance(new Vector2(posBall.x, posBall.z), new Vector2(T2_1.localPosition.x, T2_1.localPosition.z));
+        float distanceT2_2 = Vector2.Distance(new Vector2(posBall.x, posBall.z), new Vector2(T2_2.localPosition.x, T2_2.localPosition.z));
+        // Floor
+
+        if (posBall.y <= radiusBall)
+            {
+                tag = "Floor";
+                collisionNormal = new Vector3(0, 1, 0);
+            }
+            else if (((distanceT1_1 <= (PlayerRadio + radiusBall)) || (distanceT1_2 <= (PlayerRadio + radiusBall))) && (posBall.y <= heightPlayer + radiusBall) )
+            {
+                tag = "PlayerT1";
+            }
+            else if (((distanceT2_1 <= (PlayerRadio + radiusBall)) || (distanceT2_2 <= (PlayerRadio + radiusBall))) && (posBall.y <= heightPlayer + radiusBall))
+            {
+                tag = "PlayerT2";
+            }
+            else if (posBall.y <= netHeight && (distanceNet <= radiusBall))
+            {
+                tag = "Net";
+            }
+            else if (posBall.x - radiusBall <= limX_neg)
+            {
+                tag = "Wall";
+                collisionNormal = new Vector3(1, 0, 0);
+            }
+            else if (posBall.x + radiusBall >= limX_pos)
+            {
+                tag = "Wall";
+                collisionNormal = new Vector3(-1, 0, 0);
+            }
+            else if (posBall.z - radiusBall <= limZ_neg)
+            {
+                tag = "Wall";
+                collisionNormal = new Vector3(0, 0, 1);
+            }
+            else if (posBall.z + radiusBall >= limZ_pos)
+            {
+                tag = "Wall";
+                collisionNormal = new Vector3(0, 0, -1);
+            } else
+            {
+               checkLocked = false;
+            }
+
+        if (!checkLocked)
         {
-            if (lastHitByTeam == Team.T1)
+            // Calculation
+            if (tag == "PlayerT1")
             {
-                GivePointToOpponent($"Giving point to {OtherTeam(lastHitByTeam)} because {lastHitByTeam} hit {lastHitByTeam}");
-                return;
+                if (lastHitByTeam == Team.T1)
+                {
+                    GivePointToOpponent($"Giving point to {OtherTeam(lastHitByTeam)} because {lastHitByTeam} hit {lastHitByTeam}");
+                    return;
+                }
+                else
+                {
+                    GivePointToSelf($"Giving point to {lastHitByTeam} because {lastHitByTeam} hit {OtherTeam(lastHitByTeam)}");
+                    return;
+                }
+
             }
-            else
+            else if (tag == "PlayerT2")
             {
-                GivePointToSelf($"Giving point to {lastHitByTeam} because {lastHitByTeam} hit {OtherTeam(lastHitByTeam)}");
-                return;
+                if (lastHitByTeam == Team.T2)
+                {
+                    GivePointToOpponent($"Giving point to {OtherTeam(lastHitByTeam)} because {lastHitByTeam} hit {lastHitByTeam}");
+                    return;
+                }
+                else
+                {
+                    GivePointToSelf($"Giving point to {lastHitByTeam} because {lastHitByTeam} hit {OtherTeam(lastHitByTeam)}");
+                    return;
+                }
             }
-        }
-        else if (tag == "PlayerT2")
-        {
-            if (lastHitByTeam == Team.T2)
+            else if (tag == "Net")
             {
-                GivePointToOpponent($"Giving point to {OtherTeam(lastHitByTeam)} because {lastHitByTeam} hit {lastHitByTeam}");
-                return;
+                if (timesBouncedOnFloor == 0)
+                {
+                    GivePointToOpponent($"Giving point to {OtherTeam(lastHitByTeam)} because {lastHitByTeam} has hit the net");
+                    return;
+                }
+                else if (timesBouncedOnFloor >= 1)
+                {
+                    GivePointToSelf($"Giving point to {lastHitByTeam} because ball bounced once and hit the net");
+                    return;
+                }
+
             }
-            else
+            else if (tag == "Floor")
             {
-                GivePointToSelf($"Giving point to {lastHitByTeam} because {lastHitByTeam} hit {OtherTeam(lastHitByTeam)}");
-                return;
+                checkLocked = true;
+                if (hasToBounceOnService)
+                {
+                    hasToBounceOnService = false;
+                }
+                else
+                {
+                    bouncedFloor = true;
+                    bouncingPosition = transform.localPosition;
+                }
+                xAcceleration = CoefficientRestitution * xAcceleration;
+                Vector3 reflectedVelocity = Vector3.Reflect(velocityNow, collisionNormal);
+              
+                Vector3 velocity = CoefficientRestitution * reflectedVelocity;
+                velocity.y = Mathf.Abs(velocity.y);
+                AddForce(velocity);
             }
-        }
-        else if (tag == "Net")
-        {
-            if (timesBouncedOnFloor == 0)
+            else if (tag == "Wall")
             {
-                GivePointToOpponent($"Giving point to {OtherTeam(lastHitByTeam)} because {lastHitByTeam} has hit the net");
-                return;
-            }
-            else if (timesBouncedOnFloor >= 1)
-            {
-                GivePointToSelf($"Giving point to {lastHitByTeam} because ball bounced once and hit the net");
-                return;
-            }
-        }
-        else if (tag == "Floor")
-        {
-            if (hasToBounceOnService)
-            {
-                hasToBounceOnService = false;
-            }
-            else
-            {
-                bouncedFloor = true;
+                checkLocked = true;
+                bouncedWall = true;
                 bouncingPosition = transform.localPosition;
+                xAcceleration = 0;
+                Vector3 reflectedVelocity = Vector3.Reflect(velocityNow, collisionNormal);
+                Vector3 velocity = CoefficientRestitution * reflectedVelocity;
+                velocity.y = Mathf.Abs(velocity.y);
+                AddForce(velocity);
             }
-        }
-        else if (tag == "Wall")
-        {
-            bouncedWall = true;
-            bouncingPosition = transform.localPosition;
         }
     }
 
@@ -342,15 +461,15 @@ public class BallControllerX : MonoBehaviour
     public void BounceOnService()
     {
         hasToBounceOnService = true;
-        this.ballRb.useGravity = true;
-        ballRb.AddForce(new Vector3(0, -10, 0));
+        Gravity = true;
+        trajectCalc = true;
+        velocityTraject = new Vector3(0, -10, 0);
     }
 
     public bool BallCanBeServed()
     {
         return hasToBounceOnService == false && ballRb.transform.localPosition.y >= 1;
     }
-
     public bool BallIsLocked()
     {
         return ballIsLocked;
@@ -361,42 +480,51 @@ public class BallControllerX : MonoBehaviour
         return pointJustGiven;
     }
 
+    public void AddForce(Vector3 force)
+    {
+        Gravity = true;
+        trajectCalc = true;
+        velocityTraject = force;
+        recive_force_Position = ballRb.transform.localPosition;
+        tiempoAcumulado = 0;
+    }
+
     public void ServeBall(Team team, Side side, Vector3 force)
     {
         ballIsLocked = true;
         environmentController.UpdatePlayersRoles(team);
         environmentController.ClearTrajectory();
         environmentController.ClearKeyPositions();
-
         environmentController.AllowPlayersMovement();
-        
+
         ChangeTrailRendererColor(team);
         lastHitByTeam = team;
         ballRb.velocity = Vector3.zero;
-        ballRb.AddForce(force, ForceMode.VelocityChange);
         timesBallHit += 1;
-        environmentController.SimulateTrajectory(this.GetComponent<GhostBall>(), ballRb.position, force, team);
+        environmentController.SimulateTrajectory(ballRb.transform.localPosition, force, team);
         isServeBall = true;
         serverSide = side;
         timesBouncedOnFloor = 0;
         trailRenderer.emitting = true;
+
+        AddForce(force);
     }
 
-    public void HitBall(Team team, Vector3 force)
+    public void HitBall(Team team, Vector3 force, float xaceleration)
     {
-        ballIsLocked = true;
+        xAcceleration = xaceleration;
         environmentController.UpdatePlayersRoles(team);
         environmentController.ClearTrajectory();
         environmentController.ClearKeyPositions();
-
         ChangeTrailRendererColor(team);
         lastHitByTeam = team;
         ballRb.velocity = Vector3.zero;
-        ballRb.AddForce(force, ForceMode.VelocityChange);
         timesBallHit += 1;
-        environmentController.SimulateTrajectory(this.GetComponent<GhostBall>(), ballRb.position, force, team);
+        environmentController.SimulateTrajectory(ballRb.transform.localPosition, force, team);
         isServeBall = false;
         timesBouncedOnFloor = 0;
+
+        AddForce(force);
     }
 
     private void ChangeTrailRendererColor(Team team)
@@ -415,16 +543,18 @@ public class BallControllerX : MonoBehaviour
 
     public void ResetBall()
     {
+        tiempoAcumulado = 0;
         trailRenderer.emitting = false;
         ballRb.transform.localPosition = new Vector3(0, 20, 0);
-        ballRb.useGravity = false;
-        ballRb.velocity = Vector3.zero;
-        ballRb.angularVelocity = Vector3.zero;
+        velocityTraject = Vector3.zero;
+        velocityNow = Vector3.zero;
         this.transform.rotation = Quaternion.identity;
         timesBouncedOnFloor = 0;
         bouncedFloor = false;
         bouncedWall = false;
         timesBallHit = 0;
+        Gravity = false;
+        trajectCalc = false;
     }
 
     public void UpdateBallPosition(Team team, Side side)
@@ -454,12 +584,14 @@ public class BallControllerX : MonoBehaviour
                 }
                 break;
         }
+        recive_force_Position = ballRb.transform.localPosition;
     }
 
-    public Vector3 CalculateForce(Team team, float yMax, float xGrid, float zGrid)
+    public Vector3 CalculateForce(Team team, float yMax, float xGrid, float zGrid, float xacceleration)
     {
-        float xTarget = -2 * (10f / 6) + (10f / 6) * xGrid;
-        float zTarget = (10f / 6 * 5) - (10f / 6) * zGrid;
+        float XAcceleration = xacceleration;
+        xTarget = -2 * (10f / 6) + (10f / 6) * xGrid;
+        zTarget = (10f / 6 * 5) - (10f / 6) * zGrid;
         if (team == Team.T2)
         {
             zTarget *= -1;
@@ -474,7 +606,7 @@ public class BallControllerX : MonoBehaviour
         if (t < 0)
             t = (-yVelocity + Mathf.Sqrt(yVelocity * yVelocity - 2 * Physics.gravity.y * yStart)) / Physics.gravity.y;
         float zVelocity = (zTarget - zStart) / t;
-        float xVelocity = (xTarget - xStart) / t;
+        float xVelocity = (xTarget - xStart - 0.5f * XAcceleration * Mathf.Pow(t, 2)) / t;
         return new Vector3(xVelocity, yVelocity, zVelocity);
     }
 
@@ -487,4 +619,5 @@ public class BallControllerX : MonoBehaviour
     {
         return ballRb.transform.localPosition;
     }
+
 }
