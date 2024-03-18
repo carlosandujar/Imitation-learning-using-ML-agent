@@ -79,7 +79,7 @@ public class PadelAgentX : Agent
         sensor.AddObservation(teamSign * opponent2Transform.localPosition.x);
         sensor.AddObservation(teamSign * opponent2Transform.localPosition.z);
         sensor.AddObservation((float)role);
-        sensor.AddObservation(ballOnRange && ballRb.transform.localPosition.y > 0.25f && environmentController.GetLastHitByTeam() != team && !environmentController.BallIsLocked());
+        sensor.AddObservation(ballOnRange && ballRb.transform.localPosition.y > 0.25f && environmentController.GetLastHitByTeam() != team);
     }
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
@@ -111,20 +111,19 @@ public class PadelAgentX : Agent
             zTarget *= -1;
             xTarget *= -1;
         }
-        Debug.Log("targetX:" + targetX);
-        Debug.Log("targetZ:" + targetZ);
+
         Vector3 targetPos = new Vector3(xTarget,0f, zTarget);
         Vector3 posPlayer = transform.localPosition;
-
+        posPlayer.y = 0f;
+        //Debug.Log(playerId + " posPlayer:" + posPlayer);
+        //Debug.Log(playerId + " targetPos:" + targetPos);
+        
         Vector3 direction = targetPos - posPlayer;
         float magnitude = direction.magnitude;
         direction /= magnitude;
-        float x = Mathf.Clamp(direction.x, -1, 1);
-        float z = Mathf.Clamp(direction.z, -1, 1);
-
-        Vector3 clampedDirection = new Vector3(x, 0f, z);
-
-        characterController.Move(clampedDirection * speed * Time.deltaTime);
+        direction.y = 0f;
+        //Debug.Log(playerId + " direction:" + direction);
+        characterController.Move(direction * speed * Time.deltaTime);
 
         float hitHeight = 0;
         float xAceleration = 0;
@@ -177,7 +176,7 @@ public class PadelAgentX : Agent
         {
             Vector3 hitForce = environmentController.CalculateForce(team, hitHeight, xGrid, zGrid, xAceleration);
 
-            if (ballOnRange && ballRb.transform.localPosition.y > 0.25 && environmentController.GetLastHitByTeam() != team && hitForce != Vector3.zero && !environmentController.PointJustGiven() && !environmentController.BallIsLocked())
+            if (ballOnRange && ballRb.transform.localPosition.y > 0.25 && environmentController.GetLastHitByTeam() != team && hitForce != Vector3.zero && !environmentController.PointJustGiven())
             {
                 environmentController.AddTeamRewards(team, EnvironmentControllerX.HittingBallReward);
                 environmentController.HitBall(team, hitForce, xAceleration);
@@ -222,7 +221,7 @@ public class PadelAgentX : Agent
                 pendingMovementRequest = true;
             }
             bool ballIsHittable = ballOnRange && ballRb.transform.localPosition.y > 0.25
-                    && environmentController.GetLastHitByTeam() != team && !environmentController.BallIsLocked();
+                    && environmentController.GetLastHitByTeam() != team;
             
             // SHOT REQUEST
             if (!pendingShotRequest && ballIsHittable)

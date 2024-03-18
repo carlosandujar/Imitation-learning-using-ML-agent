@@ -206,9 +206,9 @@ public class EnvironmentControllerX : MonoBehaviour
         trajectoryController.ClearTrajectory();
     }
 
-    public void SimulateTrajectory(Vector3 pos, Vector3 velocity, Team hitByTeam)
+    public void SimulateTrajectory(Vector3 pos, Vector3 velocity, float xaceleration, Team hitByTeam)
     {
-        trajectoryController.SimulateTrajectory(pos, velocity, hitByTeam);
+        trajectoryController.SimulateTrajectory(pos, velocity, xaceleration, hitByTeam);
     }
 
     public void ClearKeyPositions()
@@ -241,10 +241,6 @@ public class EnvironmentControllerX : MonoBehaviour
         keyPositionsController.CalculateKeyPositionsRelatedRewards(player);
     }
 
-    public bool BallIsLocked()
-    {
-        return ballController.BallIsLocked();
-    }
 
     public void RequestCoachedMovement(PlayerId playerId, Vector3 selfPosition, Vector3 teammatePosition, Vector3 opponent1Position, Vector3 opponent2Position, Vector3 ballPosition, Team lastHitBy)
     {

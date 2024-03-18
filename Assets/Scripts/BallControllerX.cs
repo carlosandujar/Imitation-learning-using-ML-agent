@@ -38,6 +38,7 @@ public class BallControllerX : MonoBehaviour
     private float limZ_neg;
     private float limZ_pos;
     private float heightPlayer = 1.75f;
+    private float PlayerRadio = 0.4f;
 
 
     private int timesBouncedOnFloor;
@@ -50,7 +51,6 @@ public class BallControllerX : MonoBehaviour
     public TextMeshProUGUI BallInfoText;
 
     private float timesBallHit = 0;
-    private bool ballIsLocked = false;
     private bool pointJustGiven = false;
     private bool checkLocked = false;
     private bool trajectCalc;
@@ -79,7 +79,7 @@ public class BallControllerX : MonoBehaviour
 
     void Start()
     {
-        centerField = GameObject.Find("Net").transform.position;
+        centerField = GameObject.Find("Net").transform.localPosition;
         limX_neg = centerField.x - 5f;
         limX_pos = centerField.x + 5f;
         limZ_neg = centerField.z - 10f;
@@ -151,7 +151,7 @@ public class BallControllerX : MonoBehaviour
     void Update()
 
     {
-        if (transform.position.y < -1)
+        if (transform.localPosition.y < -1)
         {
             GivePointToOpponent($"Giving point to {OtherTeam(lastHitByTeam)} because the ball went outside");
             return;
@@ -159,7 +159,7 @@ public class BallControllerX : MonoBehaviour
         /* Cuando la pelota rebota en el suelo:
          *  - En el saque, si el primer rebote no aterriza donde corresponde, punto para el equipo rival
          *  - En los remates, si el primer rebote aterriza en el propio campo, punto para el equipo rival
-         *  - Si ha rebotado 2 veces en el suelo, y el punto no se ha resuelto con el primer rebote en el suelo, el punto será para el equipo que haya golpeado 100%
+         *  - Si ha rebotado 2 veces en el suelo, y el punto no se ha resuelto con el primer rebote en el suelo, el punto serï¿½ para el equipo que haya golpeado 100%
          */
         if (bouncedFloor)
         {
@@ -296,54 +296,52 @@ public class BallControllerX : MonoBehaviour
         Vector3 posBall = ballRb.transform.localPosition;
         Vector3 collisionNormal = new Vector3();
         string tag ="";
-        float PlayerRadio = 0.4f;
         float distanceNet = Vector3.Distance(new Vector3(0, 0, posBall.z), new Vector3(0, 0, centerField.z));
         float distanceT1_1 = Vector2.Distance(new Vector2(posBall.x, posBall.z), new Vector2(T1_1.localPosition.x, T1_1.localPosition.z));
         float distanceT1_2 = Vector2.Distance(new Vector2(posBall.x, posBall.z), new Vector2(T1_2.localPosition.x, T1_2.localPosition.z));
         float distanceT2_1 = Vector2.Distance(new Vector2(posBall.x, posBall.z), new Vector2(T2_1.localPosition.x, T2_1.localPosition.z));
         float distanceT2_2 = Vector2.Distance(new Vector2(posBall.x, posBall.z), new Vector2(T2_2.localPosition.x, T2_2.localPosition.z));
         // Floor
-
         if (posBall.y <= radiusBall)
-            {
-                tag = "Floor";
-                collisionNormal = new Vector3(0, 1, 0);
-            }
-            else if (((distanceT1_1 <= (PlayerRadio + radiusBall)) || (distanceT1_2 <= (PlayerRadio + radiusBall))) && (posBall.y <= heightPlayer + radiusBall) )
-            {
-                tag = "PlayerT1";
-            }
-            else if (((distanceT2_1 <= (PlayerRadio + radiusBall)) || (distanceT2_2 <= (PlayerRadio + radiusBall))) && (posBall.y <= heightPlayer + radiusBall))
-            {
-                tag = "PlayerT2";
-            }
-            else if (posBall.y <= netHeight && (distanceNet <= radiusBall))
-            {
-                tag = "Net";
-            }
-            else if (posBall.x - radiusBall <= limX_neg)
-            {
-                tag = "Wall";
-                collisionNormal = new Vector3(1, 0, 0);
-            }
-            else if (posBall.x + radiusBall >= limX_pos)
-            {
-                tag = "Wall";
-                collisionNormal = new Vector3(-1, 0, 0);
-            }
-            else if (posBall.z - radiusBall <= limZ_neg)
-            {
-                tag = "Wall";
-                collisionNormal = new Vector3(0, 0, 1);
-            }
-            else if (posBall.z + radiusBall >= limZ_pos)
-            {
-                tag = "Wall";
-                collisionNormal = new Vector3(0, 0, -1);
-            } else
-            {
-               checkLocked = false;
-            }
+        {
+            tag = "Floor";
+            collisionNormal = new Vector3(0, 1, 0);
+        }
+        else if (((distanceT1_1 <= (PlayerRadio + radiusBall)) || (distanceT1_2 <= (PlayerRadio + radiusBall))) && (posBall.y <= heightPlayer + radiusBall) )
+        {
+            tag = "PlayerT1";
+        }
+        else if (((distanceT2_1 <= (PlayerRadio + radiusBall)) || (distanceT2_2 <= (PlayerRadio + radiusBall))) && (posBall.y <= heightPlayer + radiusBall))
+        {
+            tag = "PlayerT2";
+        }
+        else if (posBall.y <= netHeight && (distanceNet <= radiusBall))
+        {
+            tag = "Net";
+        }
+        else if (posBall.x - radiusBall <= limX_neg)
+        {
+            tag = "Wall";
+            collisionNormal = new Vector3(1, 0, 0);
+        }
+        else if (posBall.x + radiusBall >= limX_pos)
+        {
+            tag = "Wall";
+            collisionNormal = new Vector3(-1, 0, 0);
+        }
+        else if (posBall.z - radiusBall <= limZ_neg)
+        {
+            tag = "Wall";
+            collisionNormal = new Vector3(0, 0, 1);
+        }
+        else if (posBall.z + radiusBall >= limZ_pos)
+        {
+            tag = "Wall";
+            collisionNormal = new Vector3(0, 0, -1);
+        } else
+        {
+            checkLocked = false;
+        }
 
         if (!checkLocked)
         {
@@ -470,10 +468,6 @@ public class BallControllerX : MonoBehaviour
     {
         return hasToBounceOnService == false && ballRb.transform.localPosition.y >= 1;
     }
-    public bool BallIsLocked()
-    {
-        return ballIsLocked;
-    }
 
     public bool PointJustGiven()
     {
@@ -487,11 +481,11 @@ public class BallControllerX : MonoBehaviour
         velocityTraject = force;
         recive_force_Position = ballRb.transform.localPosition;
         tiempoAcumulado = 0;
+
     }
 
     public void ServeBall(Team team, Side side, Vector3 force)
     {
-        ballIsLocked = true;
         environmentController.UpdatePlayersRoles(team);
         environmentController.ClearTrajectory();
         environmentController.ClearKeyPositions();
@@ -501,7 +495,7 @@ public class BallControllerX : MonoBehaviour
         lastHitByTeam = team;
         ballRb.velocity = Vector3.zero;
         timesBallHit += 1;
-        environmentController.SimulateTrajectory(ballRb.transform.localPosition, force, team);
+        environmentController.SimulateTrajectory(ballRb.transform.localPosition, force, 0f, team);
         isServeBall = true;
         serverSide = side;
         timesBouncedOnFloor = 0;
@@ -520,7 +514,7 @@ public class BallControllerX : MonoBehaviour
         lastHitByTeam = team;
         ballRb.velocity = Vector3.zero;
         timesBallHit += 1;
-        environmentController.SimulateTrajectory(ballRb.transform.localPosition, force, team);
+        environmentController.SimulateTrajectory(ballRb.transform.localPosition, force, xaceleration, team);
         isServeBall = false;
         timesBouncedOnFloor = 0;
 

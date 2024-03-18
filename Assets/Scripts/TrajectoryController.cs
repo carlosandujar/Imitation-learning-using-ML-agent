@@ -98,6 +98,7 @@ public class TrajectoryController : MonoBehaviour
                 // Calculation
                 if (tag == "Floor")
                 {
+                    checkLocked = true;
                     xAcceleration = CoefficientRestitution * xAcceleration;
                     Vector3 reflectedVelocity = Vector3.Reflect(velocityNow, collisionNormal);
                     ++timesCollidedWithFloor;
@@ -122,12 +123,13 @@ public class TrajectoryController : MonoBehaviour
             recive_force_Position = pos;
             tiempoAcumulado = 0;
         }
-        public void AddForce(Vector3 force, Vector3 position)
+        public void AddForce(Vector3 force, Vector3 position, float xacceleration)
         {
             velocityTraject = force;
             pos = position;
             recive_force_Position = position;
             tiempoAcumulado = 0;
+            xAcceleration = xacceleration;
         }
     }
 
@@ -139,11 +141,11 @@ public class TrajectoryController : MonoBehaviour
     [SerializeField] private int maxPhysicsFrameIterations;
 
     // NOTE: Whatever is instantiated in the physics scene is in world space: there are no parent transforms.
-    public void SimulateTrajectory(Vector3 pos, Vector3 velocity, Team hitByTeam)
+    public void SimulateTrajectory(Vector3 pos, Vector3 velocity, float xaceleration, Team hitByTeam)
     {
         ghostBall GhostBall = new ghostBall();
         GhostBall.CreatePhysicsScene(environmentController.GetCenterField());
-        GhostBall.AddForce(velocity, pos);
+        GhostBall.AddForce(velocity, pos, xaceleration);
         lineRenderer.positionCount = 0;
         if (environmentController.DebugMode)
         {
