@@ -4263,7 +4263,7 @@ PrefabInstance:
       objectReference: {fileID: 1442832991}
     - target: {fileID: 8540754951424539478, guid: 6f9d3d7c30814cf41b7423920a1f5266, type: 3}
       propertyPath: DebugMode
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8540754951424539478, guid: 6f9d3d7c30814cf41b7423920a1f5266, type: 3}
       propertyPath: m_Enabled
@@ -5152,7 +5152,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_UiScaleMode: 0
   m_ReferencePixelsPerUnit: 100
-  m_ScaleFactor: 1
+  m_ScaleFactor: 0.95
   m_ReferenceResolution: {x: 800, y: 600}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
@@ -5838,7 +5838,7 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
+  near clip plane: 0.1
   far clip plane: 1000
   field of view: 60
   orthographic: 0
@@ -5866,7 +5866,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1736028034}
   m_LocalRotation: {x: 0.390008, y: 0, z: 0, w: 0.92081153}
-  m_LocalPosition: {x: 0, y: 14.3, z: -15}
+  m_LocalPosition: {x: 0.29, y: 12.35, z: -13.46}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

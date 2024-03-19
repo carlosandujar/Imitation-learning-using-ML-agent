@@ -188,6 +188,7 @@ public class KeyPositionsController : MonoBehaviour
         // Decrease the time margin of receiver key positions and update whether they are still reachable
         for (int i = 0; i < 5; i++)
         {
+            Debug.Log(receiverKeyPositions[i].position + " " + receiverKeyPositions[i].timeMargin);
             if (receiverKeyPositions[i].timeMargin < 0 || !PositionIsReachable(receiverKeyPositions[i].position, receiverKeyPositions[i].timeMargin, environmentController.GetLastHitByTeam()))
             {
                 receiverKeyPositions[i].timeMargin = -1;
@@ -304,6 +305,7 @@ public class KeyPositionsController : MonoBehaviour
         }
         if (player0NearestKeypoints > player1NearestKeypoints)
         {
+
             player0.SetMarkMaterial(greenMaterial);
             player0.AssignRole(Role.Receiver);
             player1.SetMarkMaterial(redMaterial);
@@ -311,6 +313,7 @@ public class KeyPositionsController : MonoBehaviour
         }
         else if (player0NearestKeypoints < player1NearestKeypoints)
         {
+
             player0.SetMarkMaterial(redMaterial);
             player0.AssignRole(Role.Teammate);
             player1.SetMarkMaterial(greenMaterial);
@@ -318,6 +321,7 @@ public class KeyPositionsController : MonoBehaviour
         }
         else
         {
+
             player0.SetMarkMaterial(redMaterial);
             player0.AssignRole(Role.Teammate);
             player1.SetMarkMaterial(redMaterial);
@@ -352,7 +356,6 @@ public class KeyPositionsController : MonoBehaviour
 
         float z = ghostBallLocalPosition.z;
         if (hitByTeam == Team.T2) z = -z;
-
         if (PositionIsHittable(ghostBallLocalPosition) && PositionIsReachable(ghostBallLocalPosition, timeMargin, hitByTeam))
         {
             int index = -1;
@@ -460,6 +463,7 @@ public class KeyPositionsController : MonoBehaviour
         Vector3 currentPosition = new Vector3(player.transform.localPosition.x, 0, player.transform.localPosition.z);
         Vector3 lastPosition = Vector3.zero;
         Vector3 targetPosition = Vector3.zero;
+        Debug.Log(player.playerId + ":" + player.GetRole());
         switch (player.GetRole())
         {
             case Role.Opponent:
@@ -492,6 +496,7 @@ public class KeyPositionsController : MonoBehaviour
                 }
                 foreach (var keyPosition in receiverKeyPositions)
                 {
+                    Debug.Log("receiverKeyPositions : " + new Vector3(keyPosition.position.x, 0, keyPosition.position.z));
                     if (keyPosition.timeMargin > 0)
                     {
                         if (targetPosition == Vector3.zero)
@@ -530,6 +535,7 @@ public class KeyPositionsController : MonoBehaviour
                 player.AddReward(-EnvironmentControllerX.ApproachingKeyPositionsReward);
         }
         */
+        
         switch (player.GetRole())
         {
             case Role.Opponent:
@@ -552,6 +558,7 @@ public class KeyPositionsController : MonoBehaviour
                 teammateStayingReward = stayingRewardAdded;
                 break;
             case Role.Receiver:
+                Debug.Log("check Receiver");
                 lastReceiverPosition = currentPosition;
                 receiverApproachingReward = approachingRewardAdded;
                 receiverStayingReward = stayingRewardAdded;

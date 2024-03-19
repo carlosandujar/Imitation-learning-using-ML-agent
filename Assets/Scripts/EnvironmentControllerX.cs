@@ -139,6 +139,10 @@ public class EnvironmentControllerX : MonoBehaviour
     {
         return ballController.GetBallLocalPosition();
     }
+    public bool BallIsLocked()
+    {
+        return ballController.BallIsLocked();
+    }
 
     public void GivePoint(Team team, string debugMessage)
     {

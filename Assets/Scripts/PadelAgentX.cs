@@ -79,7 +79,7 @@ public class PadelAgentX : Agent
         sensor.AddObservation(teamSign * opponent2Transform.localPosition.x);
         sensor.AddObservation(teamSign * opponent2Transform.localPosition.z);
         sensor.AddObservation((float)role);
-        sensor.AddObservation(ballOnRange && ballRb.transform.localPosition.y > 0.25f && environmentController.GetLastHitByTeam() != team);
+        sensor.AddObservation(ballOnRange && ballRb.transform.localPosition.y > 0.25f && environmentController.GetLastHitByTeam() != team && !environmentController.BallIsLocked());
     }
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
@@ -89,7 +89,6 @@ public class PadelAgentX : Agent
         {
             MoveAgent(actionBuffers.DiscreteActions);
         }
-
         // REWARDS!
         environmentController.CalculateKeyPositionsRelatedRewards(this);
     }
@@ -176,7 +175,7 @@ public class PadelAgentX : Agent
         {
             Vector3 hitForce = environmentController.CalculateForce(team, hitHeight, xGrid, zGrid, xAceleration);
 
-            if (ballOnRange && ballRb.transform.localPosition.y > 0.25 && environmentController.GetLastHitByTeam() != team && hitForce != Vector3.zero && !environmentController.PointJustGiven())
+            if (ballOnRange && ballRb.transform.localPosition.y > 0.25 && environmentController.GetLastHitByTeam() != team && hitForce != Vector3.zero && !environmentController.BallIsLocked()  && !environmentController.PointJustGiven())
             {
                 environmentController.AddTeamRewards(team, EnvironmentControllerX.HittingBallReward);
                 environmentController.HitBall(team, hitForce, xAceleration);
@@ -221,7 +220,7 @@ public class PadelAgentX : Agent
                 pendingMovementRequest = true;
             }
             bool ballIsHittable = ballOnRange && ballRb.transform.localPosition.y > 0.25
-                    && environmentController.GetLastHitByTeam() != team;
+                    && environmentController.GetLastHitByTeam() != team && !environmentController.BallIsLocked();
             
             // SHOT REQUEST
             if (!pendingShotRequest && ballIsHittable)

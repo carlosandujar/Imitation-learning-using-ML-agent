@@ -153,8 +153,10 @@ public class TrajectoryController : MonoBehaviour
         }
         GhostBall.timesCollidedWithFloor = 0;
         float accumulatedTime = 0;
+        environmentController.SetSimulationCompleted(false);
         for (var i = 0; i < maxPhysicsFrameIterations; i++)
         {
+            accumulatedTime += Time.fixedDeltaTime;
             GhostBall.updatePos(Time.fixedDeltaTime);
             environmentController.AnalyzeKeyPosition(GhostBall.pos, accumulatedTime, hitByTeam);
             if (environmentController.DebugMode && lineRenderer.positionCount > 0)

@@ -51,6 +51,7 @@ public class BallControllerX : MonoBehaviour
     public TextMeshProUGUI BallInfoText;
 
     private float timesBallHit = 0;
+    private bool ballIsLocked = false;
     private bool pointJustGiven = false;
     private bool checkLocked = false;
     private bool trajectCalc;
@@ -104,8 +105,17 @@ public class BallControllerX : MonoBehaviour
         * Necessary for sync. Without locking the ball, a player might hit the ball while the trajectory
         * is being calculated
         */
+        if (ballIsLocked)
+        {
+            hitTimeMargin += Time.fixedDeltaTime;
+            if (hitTimeMargin > 0.1)
+            {
+                ballIsLocked = false;
+                hitTimeMargin = 0;
+            }
+        }
 
-        if(trajectCalc)
+        if (trajectCalc)
         {
             CheckCollision();
 
@@ -474,6 +484,11 @@ public class BallControllerX : MonoBehaviour
         return pointJustGiven;
     }
 
+    public bool BallIsLocked()
+    {
+        return ballIsLocked;
+    }
+
     public void AddForce(Vector3 force)
     {
         Gravity = true;
@@ -486,6 +501,7 @@ public class BallControllerX : MonoBehaviour
 
     public void ServeBall(Team team, Side side, Vector3 force)
     {
+        ballIsLocked = true;
         environmentController.UpdatePlayersRoles(team);
         environmentController.ClearTrajectory();
         environmentController.ClearKeyPositions();
@@ -506,11 +522,13 @@ public class BallControllerX : MonoBehaviour
 
     public void HitBall(Team team, Vector3 force, float xaceleration)
     {
+        ballIsLocked = true;
         xAcceleration = xaceleration;
         environmentController.UpdatePlayersRoles(team);
         environmentController.ClearTrajectory();
         environmentController.ClearKeyPositions();
         ChangeTrailRendererColor(team);
+
         lastHitByTeam = team;
         ballRb.velocity = Vector3.zero;
         timesBallHit += 1;
