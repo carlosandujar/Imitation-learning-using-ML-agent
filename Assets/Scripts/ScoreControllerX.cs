@@ -6,7 +6,7 @@ using UnityEngine;
 public class ScoreControllerX : MonoBehaviour
 {
 
-    private int T1Points, T2Points, T1ConsecutivePoints, T2ConsecutivePoints;
+    public int T1Points, T2Points, T1ConsecutivePoints, T2ConsecutivePoints;
 
     public EnvironmentControllerX environmentController;
 
@@ -41,7 +41,7 @@ public class ScoreControllerX : MonoBehaviour
 
     public void GivePoint(Team team)
     {
-        switch (team)
+            switch (team)
         {
             case Team.T1:
                 if (T1Points == 0) T1Points = 15;

@@ -58,7 +58,7 @@ public class ServeControllerX : MonoBehaviour
                 xGrid = 1;
                 break;
         }
-        return environmentController.CalculateForce(serverTeam, 2, xGrid, zGrid, 0f);
+        return environmentController.CalculateForce(serverTeam, 2, xGrid, zGrid, (int)BallControllerX.Efecto.Plano);
     }
 
     public void SwitchServerSide()

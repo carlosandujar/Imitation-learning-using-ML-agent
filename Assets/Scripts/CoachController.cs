@@ -5,11 +5,26 @@ using System.Net.Sockets;
 using System.Text;
 using System;
 using UnityEditor;
+using static UnityEngine.GraphicsBuffer;
+using System.Diagnostics;
+using System.Data;
+using System.IO;
+using System.Linq;
+using System.Globalization;
 
+using ExcelDataReader;
+//using NumSharp;
+using KdTree;
+using System.Runtime.InteropServices.ComTypes;
+using NetMQ;
+using NetMQ.Sockets;
+using AsyncIO;
+using UnityEditor.Search;
 public class CoachController : MonoBehaviour
 {
-    private TcpClient client;
-    private NetworkStream stream;
+
+    private RequestSocket client;
+    private bool isConnected = false;
     private byte[] buffer = new byte[1024];
 
     public EnvironmentControllerX environmentControllerX;
@@ -20,16 +35,44 @@ public class CoachController : MonoBehaviour
 
     private Vector2[][] T1SideGrid;
     private Vector2[][] T2SideGrid;
+    private Vector2[][] T1MoveGrid;
+    private Vector2[][] T2MoveGrid;
 
     Queue<string> commandsQueue = new Queue<string>();
 
+    Stopwatch stopwatch;
+    Stopwatch stopwatch2;
+
     void Start()
     {
+        //LoadData();
         if (environmentControllerX.RecordingDemonstrations)
         {
-            client = new TcpClient("127.0.0.1", 5555);
-            stream = client.GetStream();
+            try
+            {
+
+                // Initialize ZeroMQ client
+                AsyncIO.ForceDotNet.Force();
+                client = new RequestSocket();
+                client.Connect("tcp://127.0.0.1:5555");
+                isConnected = true;
+                UnityEngine.Debug.Log("Connected to the server via ZeroMQ");
+            }
+            catch (SocketException ex)
+            {
+                UnityEngine.Debug.LogError($"SocketException: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                UnityEngine.Debug.LogError($"Exception: {ex.Message}");
+            }
         }
+        else
+        {
+            UnityEngine.Debug.LogWarning("environmentControllerX is null or RecordingDemonstrations is false");
+        }
+
+
         playerIdMapping = new Dictionary<string, PlayerId>();
         playerIdMapping["T1_1"] = PlayerId.T1_1;
         playerIdMapping["T1_2"] = PlayerId.T1_2;
@@ -37,8 +80,8 @@ public class CoachController : MonoBehaviour
         playerIdMapping["T2_2"] = PlayerId.T2_2;
         hitTypeMapping = new Dictionary<string, int>();
         hitTypeMapping["normal"] = 1;
-        hitTypeMapping["lob"] = 2;
-        hitTypeMapping["smash"] = 3;
+        hitTypeMapping["lob"] = 4;
+        hitTypeMapping["smash"] = 5;
         T1SideGrid = new Vector2[5][];
         T2SideGrid = new Vector2[5][];
         for (int i = 0; i < 5; i++)
@@ -51,6 +94,33 @@ public class CoachController : MonoBehaviour
                 T1SideGrid[i][j] = new Vector2(-T2SideGrid[i][j][0], -T2SideGrid[i][j][1]);
             }
         }
+
+        T1MoveGrid = new Vector2[5][];
+        T2MoveGrid = new Vector2[5][];
+        for (int i = 0; i < 5; i++)
+        {
+            T1MoveGrid[i] = new Vector2[5];
+            T2MoveGrid[i] = new Vector2[5];
+            for (int j = 0; j < 5; j++)
+            {
+                T1MoveGrid[i][j] = new Vector2(-2 * (10f / 6) + (10f / 6) * i, -((10f / 6) + (10f / 6) * j));
+                T2MoveGrid[i][j] = new Vector2(-T1MoveGrid[i][j][0], -T1MoveGrid[i][j][1]);
+            }
+        }
+        stopwatch = new Stopwatch();
+        stopwatch2 = new Stopwatch();
+        
+    }
+    void OnDestroy()
+    {
+        if (client != null)
+        {
+            client.Close();
+            client.Dispose();
+            isConnected = false;
+            NetMQConfig.Cleanup();
+            UnityEngine.Debug.Log("Disconnected from the server via ZeroMQ");
+        }
     }
 
     private void ProcessShotResponse(string[] response)
@@ -58,8 +128,8 @@ public class CoachController : MonoBehaviour
         PlayerId playerId = playerIdMapping[response[1]];
         // hitType: 0 no hit, 1 derecha / reves, 2 globo, 3 remate
         int hitType = hitTypeMapping[response[2]];
-        float xTarget = float.Parse(response[3].Replace(".", ",")) - 5;
-        float zTarget = float.Parse(response[4].Replace(".", ",")) - 10;
+        float xTarget = float.Parse(response[3]) - 5;
+        float zTarget = float.Parse(response[4]) - 10;
         Vector2 target = new Vector2(xTarget, zTarget);
         int xGrid = 0, zGrid = 0;
         Vector2[][] Grid;
@@ -91,169 +161,144 @@ public class CoachController : MonoBehaviour
 
     private void ProcessMovementResponse(string[] response)
     {
-        Vector2 TLposition = new Vector2(float.Parse(response[2].Replace(".", ",")) - 5, float.Parse(response[3].Replace(".", ",")) - 10);
-        Vector2 TRposition = new Vector2(float.Parse(response[4].Replace(".", ",")) - 5, float.Parse(response[5].Replace(".", ",")) - 10);
-        Vector2 BLposition = new Vector2(float.Parse(response[6].Replace(".", ",")) - 5, float.Parse(response[7].Replace(".", ",")) - 10);
-        Vector2 BRposition = new Vector2(float.Parse(response[8].Replace(".", ",")) - 5, float.Parse(response[9].Replace(".", ",")) - 10);
-        Vector2 TLspeed = new Vector2(float.Parse(response[10].Replace(".", ",")), float.Parse(response[11].Replace(".", ",")));
-        Vector2 TRspeed = new Vector2(float.Parse(response[12].Replace(".", ",")), float.Parse(response[13].Replace(".", ",")));
-        Vector2 BLspeed = new Vector2(float.Parse(response[14].Replace(".", ",")), float.Parse(response[15].Replace(".", ",")));
-        Vector2 BRspeed = new Vector2(float.Parse(response[16].Replace(".", ",")), float.Parse(response[17].Replace(".", ",")));
+
+        Vector3 TLposition = new Vector3(float.Parse(response[2]) - 5, 0f, float.Parse(response[3]) - 10);
+        Vector3 TRposition = new Vector3(float.Parse(response[4]) - 5, 0f, float.Parse(response[5]) - 10);
+        Vector3 BLposition = new Vector3(float.Parse(response[6]) - 5, 0f, float.Parse(response[7]) - 10);
+        Vector3 BRposition = new Vector3(float.Parse(response[8]) - 5, 0f, float.Parse(response[9]) - 10);
+        Vector3 TLspeed = new Vector3(float.Parse(response[10]), 0f, float.Parse(response[11]));
+        Vector3 TRspeed = new Vector3(float.Parse(response[12]), 0f, float.Parse(response[13]));
+        Vector3 BLspeed = new Vector3(float.Parse(response[14]), 0f, float.Parse(response[15]));
+        Vector3 BRspeed = new Vector3(float.Parse(response[16]), 0f, float.Parse(response[17]));
 
 
+        float Maxspeed = environmentControllerX.GetMaxspeed_Agent();
+        
+        Vector3[] movement = new Vector3[4] { TLspeed , TRspeed, BLspeed, BRspeed};
+        Vector3[] position = new Vector3[4] { TLposition, TRposition, BLposition, BRposition };
 
-        int[] TLAction = new int[2];
-        if (TLspeed[1] < 0) // Z AXIS. FORWARD
+        for (int i = 0; i < 4; i++)
         {
-            TLAction[0] = 1; // FORWARD AXIS
-        }
-        else if (TLspeed[1] > 0)
-        {
-            TLAction[0] = 2;
-        }
-        else
-        {
-            TLAction[0] = 0;
-        }
-        if (TLspeed[0] < 0)// X AXIS. RIGHT 
-        {
-            TLAction[0] = 1;
-        }
-        else if (TLspeed[0] > 0)
-        {
-            TLAction[0] = 2;
-        }
-        else
-        {
-            TLAction[0] = 0;
+            movement[i].x = Mathf.Clamp(movement[i].x, -Maxspeed, Maxspeed);
+            movement[i].y = Mathf.Clamp(movement[i].y, -Maxspeed, Maxspeed);
+            movement[i].z = Mathf.Clamp(movement[i].z, -Maxspeed, Maxspeed);
         }
 
-        PlayerId nearestToTL = environmentControllerX.GetNearestPlayerToPosition(TLposition);
-        environmentControllerX.SendCoachedMovement(nearestToTL, TLAction);
+        for (int i = 0; i < 4; i++)
+        {
 
+            float magnitudeMovement = movement[i].magnitude;
+            float speed = Maxspeed;
+            Vector3 direction = movement[i] / speed;
 
+            Vector3 posPlayer = position[i];
+            Vector3 targetPos = posPlayer + direction * magnitudeMovement;
 
+            float xTarget = targetPos.x;
+            float zTarget = targetPos.z;
 
-        int[] TRAction = new int[2];
-        if (TRspeed[1] < 0) // Z AXIS. FORWARD
-        {
-            TRAction[0] = 1; // FORWARD AXIS
-        }
-        else if (TRspeed[1] > 0)
-        {
-            TRAction[0] = 2;
-        }
-        else
-        {
-            TRAction[0] = 0;
-        }
-        if (TRspeed[0] < 0)// X AXIS. RIGHT 
-        {
-            TRAction[0] = 1;
-        }
-        else if (TRspeed[0] > 0)
-        {
-            TRAction[0] = 2;
-        }
-        else
-        {
-            TRAction[0] = 0;
-        }
+            int xGrid = 0, zGrid = 0;
+            Vector2[][] Grid;
+            if (i>1)
+            {
+                Grid = T1MoveGrid;
+            }
+            else
+            {
+                Grid = T2MoveGrid;
+            }
+            
+            Vector2 target = new Vector2(xTarget, zTarget);
+            for (int x = 0; x < 5; x++)
+            {
+                for (int j = 0; j < 5; j++)
+                {
+                    if (Vector2.Distance(target, Grid[x][j]) < Vector2.Distance(target, Grid[xGrid][zGrid]))
+                    {
+                        xGrid = x;
+                        zGrid = j;
+                    }
+                }
+            }
 
-        PlayerId nearestToTR = environmentControllerX.GetNearestPlayerToPosition(TRposition);
-        environmentControllerX.SendCoachedMovement(nearestToTR, TRAction);
+            int[] Action = new int[2];
+            Action[0] = xGrid;
+            Action[1] = zGrid;
 
+            PlayerId nearestToPos = environmentControllerX.GetNearestPlayerToPosition(new Vector2(position[i].x, position[i].z));
 
+            environmentControllerX.SendCoachedMovement(nearestToPos, Action);
 
-        int[] BLAction = new int[2];
-        if (BLspeed[1] > 0)
-        {
-            BLAction[0] = 1;
         }
-        else if (BLspeed[1] < 0)
+        if (environmentControllerX.environmentId == 0)
         {
-            BLAction[0] = 2;
+            stopwatch.Stop();
+            float tiempoEjecucion = stopwatch.ElapsedMilliseconds;
+            UnityEngine.Debug.Log("Tiempo de Enviar y calcular: " + tiempoEjecucion + " ms");
+            stopwatch.Reset();
         }
-        else
-        {
-            BLAction[0] = 0;
-        }
-        if (BLspeed[0] > 0)
-        {
-            BLAction[1] = 1;
-        }
-        else if (BLspeed[0] < 0)
-        {
-            BLAction[1] = 2;
-        }
-        else
-        {
-            BLAction[1] = 0;
-        }
-
-        PlayerId nearestToBL = environmentControllerX.GetNearestPlayerToPosition(BLposition);
-        environmentControllerX.SendCoachedMovement(nearestToBL, BLAction);
-
-
-
-
-        int[] BRAction = new int[2];
-        if (BRspeed[1] > 0)
-        {
-            BRAction[0] = 1;
-        }
-        else if (BRspeed[1] < 0)
-        {
-            BRAction[0] = 2;
-        }
-        else
-        {
-            BRAction[0] = 0;
-        }
-        if (BRspeed[0] > 0)
-        {
-            BRAction[1] = 1;
-        }
-        else if (BRspeed[0] < 0)
-        {
-            BRAction[1] = 2;
-        }
-        else
-        {
-            BRAction[1] = 0;
-        }
-        PlayerId nearestToBR = environmentControllerX.GetNearestPlayerToPosition(BRposition);
-        environmentControllerX.SendCoachedMovement(nearestToBR, BRAction);
-
         someoneAlreadyRequested = false;
-    } 
+    }
+
+    private bool isWaitingForResponse = false;
 
     void Update()
     {
         if (environmentControllerX.RecordingDemonstrations)
         {
-            if (client == null || !client.Connected)
+            if (client == null && !isConnected)
             {
                 // Handle disconnection or try to reconnect
-                Debug.Log("Not connected to the server");
+                UnityEngine.Debug.Log("Not connected to the server");
                 return;
             }
 
-            if (stream.DataAvailable)
+            //if (stream.DataAvailable)
+            //{
+            //    if (environmentControllerX.environmentId == 0)
+            //    {
+            //        UnityEngine.Debug.Log("Recibido ");
+            //        stopwatch2.Stop();
+            //        float tiempoEjecucion = stopwatch2.ElapsedMilliseconds;
+            //        UnityEngine.Debug.Log("Tiempo de Enviar y recibir: " + tiempoEjecucion + " ms");
+            //        stopwatch2.Reset();
+            //    }
+            //    int bytesRead = stream.Read(buffer, 0, buffer.Length);
+            //    string receivedData = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+            //    string[] responses = receivedData.Split('\n');
+            //    foreach (string unsplitted_response in responses)
+            //    {
+            //        string[] response = unsplitted_response.Split(" ");
+            //        if (response[0] == "SHOT_RESPONSE")
+            //        {
+            //            ProcessShotResponse(response);
+            //        }
+            //        else if (response[0] == "MOVEMENT_RESPONSE")
+            //        {
+            //            ProcessMovementResponse(response);
+            //        }
+            //    }
+            //}
+
+            if (isWaitingForResponse)
             {
-                int bytesRead = stream.Read(buffer, 0, buffer.Length);
-                string receivedData = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                string[] responses = receivedData.Split('\n');
-                foreach (string unsplitted_response in responses)
+                string receivedData = string.Empty;
+                if (client.TryReceiveFrameString(out receivedData))
                 {
-                    string[] response = unsplitted_response.Split(" ");
-                    if (response[0] == "SHOT_RESPONSE")
+                    UnityEngine.Debug.Log("Received: " + receivedData);
+                    isWaitingForResponse = false; // Mark that we've received the response
+                    string[] responses = receivedData.Split('\n');
+                    foreach (string unsplitted_response in responses)
                     {
-                        ProcessShotResponse(response);
-                    }
-                    else if (response[0] == "MOVEMENT_RESPONSE")
-                    {
-                        ProcessMovementResponse(response);
+                        string[] response = unsplitted_response.Split(" ");
+                        if (response[0] == "SHOT_RESPONSE")
+                        {
+                            ProcessShotResponse(response);
+                        }
+                        else if (response[0] == "MOVEMENT_RESPONSE")
+                        {
+                            ProcessMovementResponse(response);
+                        }
                     }
                 }
             }
@@ -263,13 +308,24 @@ public class CoachController : MonoBehaviour
 
     void SendCommandToPython(string command)
     {
-        // Send command to Python script
-        byte[] data = Encoding.ASCII.GetBytes(command);
-        stream.Write(data, 0, data.Length);
+        if (environmentControllerX.environmentId == 0)
+        {
+           
+            stopwatch.Start();
+            stopwatch2.Start();
+        }
+
+        if (isConnected && !isWaitingForResponse)
+        {
+            isWaitingForResponse = true;
+            // Send command to Python script
+            client.SendFrame(command);
+        }
     }
 
 
     bool someoneAlreadyRequested = false;
+
     public void RequestCoachedMovement(PlayerId playerId, Vector3 selfPosition, Vector3 teammatePosition, Vector3 opponent1Position, Vector3 opponent2Position, Vector3 ballPosition, Team lastHitBy)
     {
         if (!someoneAlreadyRequested)
@@ -359,4 +415,63 @@ public class CoachController : MonoBehaviour
         string command = $"SHOT_REQUEST {playerId} {TL[0] + 5} {TL[1] + 10} {TR[0]+5} {TR[1]+10} {BL[0]+5} {BL[1]+10} {BR[0]+5} {BR[1]+10} {ballPosition.x+5} {ballPosition.z+10}\n";
         SendCommandToPython(command);
     }
+
+    //public static DataSet dataSet;
+
+    //public static DataTable topPositionData;
+    //public static DataTable bottomPositionData;
+    //public static DataTable topShotData;
+    //public static DataTable bottomShotData;
+
+
+    //public void LoadData()
+    //{
+    //    string folderPath = Directory.GetCurrentDirectory()+ "\\Assets\\Scripts";
+    //    string excelFileName = "data.csv";
+
+    //    string excelFilePath = Path.Combine(folderPath, excelFileName);
+
+    //    // Create a FileStream to read the Excel file
+    //    using (var stream = File.Open(excelFilePath, FileMode.Open, FileAccess.Read))
+    //    {
+    //        // Create an ExcelDataReader to read the data from the Excel file
+    //        using (var reader = ExcelReaderFactory.CreateCsvReader(stream, new ExcelReaderConfiguration()
+    //        {
+    //            FallbackEncoding = Encoding.GetEncoding(1252), // Encoding for Western European (Windows)
+    //            AutodetectSeparators = new char[] { ',', ';', '\t' }, // Autodetect separators
+    //            LeaveOpen = false // Close the reader after data is read
+    //        }))
+    //        {
+    //            // Read the data into a DataSet
+    //            DataSet result = reader.AsDataSet(new ExcelDataSetConfiguration()
+    //            {
+    //                ConfigureDataTable = (_) => new ExcelDataTableConfiguration()
+    //                {
+    //                    UseHeaderRow = true // Treat the first row as header (containing column names)
+    //                }
+    //            });
+
+    //            // Extract the DataTable from the DataSet
+    //            DataTable data = result.Tables[0];
+
+    //            // Remove unnecessary columns
+    //            string[] columnsToDrop = { "Column0", "frame", "time", "role1", "role2", "role3", "role4", "fromx", "fromy", "duration", "shot_full", "rally" };
+    //            foreach (string column in columnsToDrop)
+    //            {
+    //                if (data.Columns.Contains(column))
+    //                {
+    //                    data.Columns.Remove(column);
+    //                }
+    //            }
+
+    //            // Filter data by column
+    //            topPositionData = data.AsEnumerable().Where(row => row.Field<string>("lastHit") == "T").CopyToDataTable();
+    //            bottomPositionData = data.AsEnumerable().Where(row => row.Field<string>("lastHit") == "B").CopyToDataTable();
+    //            topShotData = topPositionData.AsEnumerable().Where(row => row.Field<string>("shot") != "undef").CopyToDataTable();
+    //            bottomShotData = bottomPositionData.AsEnumerable().Where(row => row.Field<string>("shot") != "undef").CopyToDataTable();
+    //        }
+    //    }
+
+    //}
+
 }

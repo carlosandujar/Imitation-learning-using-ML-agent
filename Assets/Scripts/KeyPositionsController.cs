@@ -27,7 +27,7 @@ public class KeyPositionsController : MonoBehaviour
     public TextMeshProUGUI TeammateText;
     
 
-    private class ReceiverKeyPosition
+    public class ReceiverKeyPosition
     {
         public Vector3 position;
         public float timeMargin;
@@ -46,7 +46,7 @@ public class KeyPositionsController : MonoBehaviour
     private const float GridDistance = 10f / 6;
 
     // Receiver related variables
-    private ReceiverKeyPosition[] receiverKeyPositions; // LOCAL POSITIONS
+    public ReceiverKeyPosition[] receiverKeyPositions; // LOCAL POSITIONS
     private GameObject[] points;
     private Vector3 lastReceiverPosition = Vector3.zero;
     private bool receiverApproachingReward = false;
@@ -188,7 +188,6 @@ public class KeyPositionsController : MonoBehaviour
         // Decrease the time margin of receiver key positions and update whether they are still reachable
         for (int i = 0; i < 5; i++)
         {
-            Debug.Log(receiverKeyPositions[i].position + " " + receiverKeyPositions[i].timeMargin);
             if (receiverKeyPositions[i].timeMargin < 0 || !PositionIsReachable(receiverKeyPositions[i].position, receiverKeyPositions[i].timeMargin, environmentController.GetLastHitByTeam()))
             {
                 receiverKeyPositions[i].timeMargin = -1;
@@ -463,7 +462,6 @@ public class KeyPositionsController : MonoBehaviour
         Vector3 currentPosition = new Vector3(player.transform.localPosition.x, 0, player.transform.localPosition.z);
         Vector3 lastPosition = Vector3.zero;
         Vector3 targetPosition = Vector3.zero;
-        Debug.Log(player.playerId + ":" + player.GetRole());
         switch (player.GetRole())
         {
             case Role.Opponent:
@@ -496,7 +494,6 @@ public class KeyPositionsController : MonoBehaviour
                 }
                 foreach (var keyPosition in receiverKeyPositions)
                 {
-                    Debug.Log("receiverKeyPositions : " + new Vector3(keyPosition.position.x, 0, keyPosition.position.z));
                     if (keyPosition.timeMargin > 0)
                     {
                         if (targetPosition == Vector3.zero)
@@ -558,7 +555,6 @@ public class KeyPositionsController : MonoBehaviour
                 teammateStayingReward = stayingRewardAdded;
                 break;
             case Role.Receiver:
-                Debug.Log("check Receiver");
                 lastReceiverPosition = currentPosition;
                 receiverApproachingReward = approachingRewardAdded;
                 receiverStayingReward = stayingRewardAdded;

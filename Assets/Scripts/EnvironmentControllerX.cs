@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -41,12 +43,15 @@ public class EnvironmentControllerX : MonoBehaviour
     */
     public const float WinningReward = 10;
     public const float LosingReward = -10;
-    public const float ApproachingKeyPositionsReward = 0.005f;
-    public const float StayingAroundKeyPositionsReward = 0.01f;
-    public const float HittingBallReward = 0f;
+    public const float ApproachingKeyPositionsReward = 0.01f; //0.005f;
+    public const float StayingAroundKeyPositionsReward = 0.1f; // 0.01f;
+    public const float HittingBallReward = 0.05f;
+    public const float SpeedReward = 0.001f;
     private bool simulationCompleted;
-    public bool DebugMode;
     public bool RecordingDemonstrations;
+
+    public bool DebugMode;
+    public bool logEnabled;
 
     private void Start()
     {
@@ -130,14 +135,19 @@ public class EnvironmentControllerX : MonoBehaviour
         ballController.ServeBall(team, side, force);
     }
 
-    public void HitBall(Team team, Vector3 force, float xAceleration)
+    public void HitBall(Team team, Vector3 force, int hitType)
     {
-        ballController.HitBall(team, force, xAceleration);
+        ballController.HitBall(team, force, hitType);
     }
 
     public Vector3 GetBallLocalPosition()
     {
         return ballController.GetBallLocalPosition();
+    }
+
+    public float GetMaxspeed_Agent()
+    {
+        return agentsController.padelAgentsList[0].Maxspeed;
     }
     public bool BallIsLocked()
     {
@@ -166,9 +176,9 @@ public class EnvironmentControllerX : MonoBehaviour
         return ballController.PointJustGiven();
     }
 
-    public Vector3 CalculateForce(Team team, float yMax, float xGrid, float zGrid, float xacceleration)
+    public Vector3 CalculateForce(Team team, float yMax, float xGrid, float zGrid, int hitType)
     {
-        return ballController.CalculateForce(team, yMax, xGrid, zGrid, xacceleration);
+        return ballController.CalculateForce(team, yMax, xGrid, zGrid, hitType);
     }
 
     public void ResetScene()
@@ -210,9 +220,9 @@ public class EnvironmentControllerX : MonoBehaviour
         trajectoryController.ClearTrajectory();
     }
 
-    public void SimulateTrajectory(Vector3 pos, Vector3 velocity, float xaceleration, Team hitByTeam)
+    public void SimulateTrajectory(Vector3 pos, Vector3 velocity, Team hitByTeam, BallControllerX.Efecto efecto)
     {
-        trajectoryController.SimulateTrajectory(pos, velocity, xaceleration, hitByTeam);
+        trajectoryController.SimulateTrajectory(pos, velocity, hitByTeam, efecto);
     }
 
     public void ClearKeyPositions()
@@ -275,4 +285,113 @@ public class EnvironmentControllerX : MonoBehaviour
     {
         return ballController.centerField;
     }
+    public Logger logger = new();
+
+}
+
+
+public class Action
+{
+    public string time;
+    public long seconds;
+    public int team;
+    public int player;
+    public float Zpos;
+    public float Xpos;
+    public float xGrid;
+    public float zGrid;
+    public int hitType;
+    public Vector3[] playerPositions;
+
+    public Action(string _time, long _seconds, int _team, int _player, float _Zpos, float _Xpos, float x, float z, int type, Vector3[] _playerPositions)
+    {
+        time = _time;
+        seconds = _seconds;
+        team = _team;
+        player = _player;
+        Zpos = _Zpos;
+        Xpos = _Xpos;
+        xGrid = x;
+        zGrid = z;
+        hitType = type;
+        playerPositions = _playerPositions;
+    }
+}
+
+public class State
+{
+    public string time;
+    public long seconds;
+
+    public Vector3[] playerPositions;
+    public Vector3 ballPosition;
+
+    public State(string _time, long _seconds, Vector3[] _playerPositions, Vector3 _ballPosition)
+    {
+        time = _time;
+        seconds = _seconds;
+        playerPositions = _playerPositions;
+        ballPosition = _ballPosition;
+    }
+}
+
+public class Logger
+{
+    private const int STEPS = 1000;  // save to disk every STEPS actions
+    public List<Action> actions = new List<Action>();
+    public List<State> states = new List<State>();
+    public void LogAction(int team, int player, float Xtarget, float Ztarget, float xGrid, float zGrid, int hitType, Vector3[] playerPositions)
+    {
+        actions.Add(new Action(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss.fff"), DateTimeOffset.Now.ToUnixTimeMilliseconds(), team, player, Xtarget, Ztarget, xGrid, zGrid, hitType, playerPositions));
+        if (actions.Count % STEPS == 0)
+        {
+            SaveActions();
+        }
+    }
+
+    public void LogState(Vector3[] playerPositions, Vector3 ballPosition)
+    {
+        states.Add(new State(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss.fff"), DateTimeOffset.Now.ToUnixTimeMilliseconds(), playerPositions, ballPosition));
+        if (states.Count % STEPS == 0)
+        {
+            SaveStates();
+        }
+    }
+
+    const string folder = @"C:\Temp\";
+    public void SaveActions()
+    {
+        string fileName = "actionLog.csv";
+        string fullPath = folder + fileName;
+
+        string[] rows = new string[actions.Count];
+        for (int i = 0; i < actions.Count; i++)
+        {
+            rows[i] = $"{actions[i].time};{actions[i].seconds};{actions[i].team};{actions[i].player % 2};{actions[i].Xpos};{actions[i].Zpos};{actions[i].xGrid};{actions[i].zGrid};{actions[i].hitType};";
+            for (int j = 0; j < 4; j++)
+            {
+                Vector3 p = actions[i].playerPositions[j];
+                rows[i] += $"{actions[i].playerPositions[j].x};{actions[i].playerPositions[j].z};";
+            }
+        }
+        File.WriteAllLines(fullPath, rows);
+    }
+    public void SaveStates()
+    {
+        string fileName = "stateLog.csv";
+        string fullPath = folder + fileName;
+        string[] rows = new string[states.Count];
+        for (int i = 0; i < states.Count; i++)
+        {
+            rows[i] = $"{states[i].time};{states[i].seconds};";
+            for (int j = 0; j < 4; j++)
+            {
+                Vector3 p = states[i].playerPositions[j];
+                rows[i] += $"{states[i].playerPositions[j].x};{states[i].playerPositions[j].z};";
+            }
+            rows[i] += $"{states[i].ballPosition.x};{states[i].ballPosition.y};{states[i].ballPosition.z}";
+        }
+        File.WriteAllLines(fullPath, rows);
+    }
+
 }

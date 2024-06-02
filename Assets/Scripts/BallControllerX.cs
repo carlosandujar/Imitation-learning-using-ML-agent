@@ -3,12 +3,23 @@ using System.Collections.Generic;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using static BallControllerX;
 
 public class BallControllerX : MonoBehaviour
 {
 
     public EnvironmentControllerX environmentController;
 
+    // ball state
+    public enum Efecto
+    {
+        Plano,
+        Slice,
+        Topspin
+    }
+    public Efecto efecto;
+    private int timesBouncedOnFloor;
+    private bool isServeBall;
     //Hits 
     private bool hasToBounceOnService;
     private Team lastHitByTeam;
@@ -19,10 +30,13 @@ public class BallControllerX : MonoBehaviour
     //Speed and position 
     private Vector3 initialPosition;
     private Rigidbody ballRb;
-    public float CoefficientRestitution = 0.76f;
+    public float CoefficientRestitution_Floor = 0.76f;
+    public float CoefficientRestitution_Wall = 0.5f;
+    public float CoefficientRestitution_Slice = 0.65f;
+    public float CoefficientRestitution_Topspin = 0.85f;
+    public float gravity_slice = -6.5f;
     private float tiempoAcumulado = 0f;
     private bool Gravity;
-    public float xAcceleration; // aceleration on x axis
     [SerializeField] private Vector3 recive_force_Position;
     [SerializeField] private float xTarget, zTarget;
     [SerializeField] private Vector3 velocityTraject;
@@ -41,8 +55,6 @@ public class BallControllerX : MonoBehaviour
     private float PlayerRadio = 0.4f;
 
 
-    private int timesBouncedOnFloor;
-    private bool isServeBall;
 
     private TrailRenderer trailRenderer;
     Color _orange = new Color(1.0f, 0.64f, 0.0f);
@@ -120,21 +132,29 @@ public class BallControllerX : MonoBehaviour
             CheckCollision();
 
             tiempoAcumulado += Time.fixedDeltaTime;
-            velocityNow.x = velocityTraject.x + xAcceleration * tiempoAcumulado;
-            
+            velocityNow.x = velocityTraject.x;
             velocityNow.z = velocityTraject.z;
-            float X = recive_force_Position.x + velocityTraject.x * tiempoAcumulado + 0.5f * xAcceleration * Mathf.Pow(tiempoAcumulado, 2);
             float Y;
             if (Gravity)
             {
-                velocityNow.y = velocityTraject.y + (-9.8f) * tiempoAcumulado;
-                Y = recive_force_Position.y + velocityTraject.y * tiempoAcumulado + 0.5f * Physics.gravity.y * Mathf.Pow(tiempoAcumulado, 2);
+                if (efecto == Efecto.Slice)
+                {
+                    velocityNow.y = velocityTraject.y + gravity_slice * tiempoAcumulado;
+                    Y = recive_force_Position.y + velocityTraject.y * tiempoAcumulado + 0.5f * gravity_slice * Mathf.Pow(tiempoAcumulado, 2);
+
+                }
+                else
+                {
+                    velocityNow.y = velocityTraject.y + Physics.gravity.y * tiempoAcumulado;
+                    Y = recive_force_Position.y + velocityTraject.y * tiempoAcumulado + 0.5f * Physics.gravity.y * Mathf.Pow(tiempoAcumulado, 2);
+                }
             }
             else
             {
                 velocityNow.y = velocityTraject.y;
                 Y = recive_force_Position.y + velocityTraject.y;
             }
+            float X = recive_force_Position.x + velocityTraject.x * tiempoAcumulado;
             float Z = recive_force_Position.z + velocityTraject.z * tiempoAcumulado;
             ballRb.transform.localPosition = new Vector3(X, Y, Z);
 
@@ -409,21 +429,36 @@ public class BallControllerX : MonoBehaviour
                     bouncedFloor = true;
                     bouncingPosition = transform.localPosition;
                 }
-                xAcceleration = CoefficientRestitution * xAcceleration;
                 Vector3 reflectedVelocity = Vector3.Reflect(velocityNow, collisionNormal);
               
-                Vector3 velocity = CoefficientRestitution * reflectedVelocity;
-                velocity.y = Mathf.Abs(velocity.y);
-                AddForce(velocity);
+                switch(efecto)
+                {
+                    case Efecto.Plano:
+                        Vector3 velocity = CoefficientRestitution_Floor * reflectedVelocity;
+                        velocity.y = Mathf.Abs(velocity.y);
+                        AddForce(velocity);
+                        break;
+                    case Efecto.Slice:
+                        Vector3 velocity_slice = CoefficientRestitution_Slice * reflectedVelocity;
+                        velocity_slice.y = Mathf.Abs(velocity_slice.y);
+                        efecto= Efecto.Plano;
+                        AddForce(velocity_slice);
+                        break;
+                    case Efecto.Topspin:
+                        Vector3 velocity_topspin = CoefficientRestitution_Topspin * reflectedVelocity;
+                        velocity_topspin.y = Mathf.Abs(velocity_topspin.y);
+                        efecto = Efecto.Plano;
+                        AddForce(velocity_topspin);
+                        break;
+                }
             }
             else if (tag == "Wall")
             {
                 checkLocked = true;
                 bouncedWall = true;
                 bouncingPosition = transform.localPosition;
-                xAcceleration = 0;
                 Vector3 reflectedVelocity = Vector3.Reflect(velocityNow, collisionNormal);
-                Vector3 velocity = CoefficientRestitution * reflectedVelocity;
+                Vector3 velocity = CoefficientRestitution_Wall * reflectedVelocity;
                 velocity.y = Mathf.Abs(velocity.y);
                 AddForce(velocity);
             }
@@ -511,7 +546,7 @@ public class BallControllerX : MonoBehaviour
         lastHitByTeam = team;
         ballRb.velocity = Vector3.zero;
         timesBallHit += 1;
-        environmentController.SimulateTrajectory(ballRb.transform.localPosition, force, 0f, team);
+        environmentController.SimulateTrajectory(ballRb.transform.localPosition, force, team, Efecto.Plano);
         isServeBall = true;
         serverSide = side;
         timesBouncedOnFloor = 0;
@@ -520,10 +555,25 @@ public class BallControllerX : MonoBehaviour
         AddForce(force);
     }
 
-    public void HitBall(Team team, Vector3 force, float xaceleration)
+    public void HitBall(Team team, Vector3 force, int  hitType)
     {
+        switch (hitType)
+        {
+            // Plano
+            case 1:
+                efecto = Efecto.Plano;
+                break;
+            // Slice
+            case 2:
+                efecto = Efecto.Slice;
+                break;
+            // Topspin
+            case 3:
+                efecto = Efecto.Topspin;
+                break;
+        } 
+
         ballIsLocked = true;
-        xAcceleration = xaceleration;
         environmentController.UpdatePlayersRoles(team);
         environmentController.ClearTrajectory();
         environmentController.ClearKeyPositions();
@@ -532,7 +582,7 @@ public class BallControllerX : MonoBehaviour
         lastHitByTeam = team;
         ballRb.velocity = Vector3.zero;
         timesBallHit += 1;
-        environmentController.SimulateTrajectory(ballRb.transform.localPosition, force, xaceleration, team);
+        environmentController.SimulateTrajectory(ballRb.transform.localPosition, force, team, efecto);
         isServeBall = false;
         timesBouncedOnFloor = 0;
 
@@ -599,9 +649,25 @@ public class BallControllerX : MonoBehaviour
         recive_force_Position = ballRb.transform.localPosition;
     }
 
-    public Vector3 CalculateForce(Team team, float yMax, float xGrid, float zGrid, float xacceleration)
+    public Vector3 CalculateForce(Team team, float yMax, float xGrid, float zGrid, int hitType)
     {
-        float XAcceleration = xacceleration;
+        float gravity = Physics.gravity.y;
+        switch (hitType)
+        {
+            // Plano
+            case 1:
+
+                break;
+                // Slice
+            case 2:
+                gravity = gravity_slice;
+                break;
+                // Topspin
+            case 3:
+
+                break;
+        }
+
         xTarget = -2 * (10f / 6) + (10f / 6) * xGrid;
         zTarget = (10f / 6 * 5) - (10f / 6) * zGrid;
         if (team == Team.T2)
@@ -609,16 +675,24 @@ public class BallControllerX : MonoBehaviour
             zTarget *= -1;
             xTarget *= -1;
         }
+        // Noise
+        float speed = ballRb.velocity.magnitude;
+        float noise = speed / 10.0f;
+
+        zTarget += Random.Range(-noise, noise);
+        xTarget += Random.Range(-noise, noise);
+
         float zStart = ballRb.transform.localPosition.z;
         float xStart = ballRb.transform.localPosition.x;
         float yStart = ballRb.transform.localPosition.y;
         if (yMax < yStart) yMax = yStart;
-        float yVelocity = Mathf.Sqrt((yStart - yMax) * 2 * (Physics.gravity.y));
-        float t = (-yVelocity - Mathf.Sqrt(yVelocity * yVelocity - 2 * Physics.gravity.y * yStart)) / Physics.gravity.y;
+
+        float yVelocity = Mathf.Sqrt((yStart - yMax) * 2 * (gravity));
+        float t = (-yVelocity - Mathf.Sqrt(yVelocity * yVelocity - 2 * gravity * yStart)) / gravity;
         if (t < 0)
-            t = (-yVelocity + Mathf.Sqrt(yVelocity * yVelocity - 2 * Physics.gravity.y * yStart)) / Physics.gravity.y;
+            t = (-yVelocity + Mathf.Sqrt(yVelocity * yVelocity - 2 * gravity * yStart)) / gravity;
         float zVelocity = (zTarget - zStart) / t;
-        float xVelocity = (xTarget - xStart - 0.5f * XAcceleration * Mathf.Pow(t, 2)) / t;
+        float xVelocity = (xTarget - xStart) / t;
         return new Vector3(xVelocity, yVelocity, zVelocity);
     }
 

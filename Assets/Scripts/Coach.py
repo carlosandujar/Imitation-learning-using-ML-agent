@@ -7,6 +7,7 @@ from io import BytesIO
 import threading
 import queue
 import time
+import zmq
 
 def load_data():
     global top_position_data
@@ -22,14 +23,14 @@ def load_data():
 
     # Read the Excel file into a Pandas DataFrame
     data = pd.read_excel(excel_file_path)
-    columns_to_drop = ['Unnamed: 0', 'frame', 'time', 'role', 'role.1', 'role.2', 'role.3']
+    columns_to_drop = ['Unnamed: 0', 'frame', 'time', 'role1', 'role2', 'role3', 'role4', 'fromx' , 'fromy' ,'duration', 'shot_full', 'rally']
     data = data.drop(columns=columns_to_drop)
 
     # Filter data by column
     # Top position data -> 'last hit' == 'T'
-    top_position_data = data[data['last hit'] == 'T']
+    top_position_data = data[data['lastHit'] == 'T']
     # Bot position data -> 'last hit' == 'B'
-    bottom_position_data = data[data['last hit'] == 'B']
+    bottom_position_data = data[data['lastHit'] == 'B']
     # Top shot data -> shots from 'T'
     top_shot_data = top_position_data[top_position_data['shot'] != 'undef']
     # Top shot data -> shots from 'B'
@@ -67,29 +68,37 @@ def process_movement_request(command_array):
     else:
         dist, index = bottom_position_kd.query(query_array)
         return np.concatenate((bottom_position_data[index, 0:8], bottom_position_data[index, 10:18]), axis=None)
-
+    
 
 def process_command(command):
     command_array = command.split()
-    if (command_array[0] == 'SHOT_REQUEST'):
+    command_type = command_array[0]
+
+    if command_type == 'SHOT_REQUEST':
         start_time = time.time()
         nearest_sample = process_shot_request(command_array)
-        end_time = time.time()
-        elapsed_time = end_time - start_time
-        response = 'SHOT_RESPONSE ' + command_array[1] + ' ' + ' '.join(str(value) for value in nearest_sample) + '\n'
+        elapsed_time = time.time() - start_time
+        response = "SHOT_RESPONSE " + command_array[1] + ' ' + ' '.join(str(value) for value in nearest_sample) + '\n'
         print("SENDING SHOT RESPONSE: " + response)
         print(f"Elapsed time: {elapsed_time} seconds")
-        conn.send(response.encode('utf-8'))
-    elif (command_array[0] == 'MOVEMENT_REQUEST'):
+        if socket and not socket.closed:
+            socket.send_string(response)
+        else:
+            print("Socket is closed, cannot send response.")
+    elif command_type == 'MOVEMENT_REQUEST':
         start_time = time.time()
         nearest_sample = process_movement_request(command_array)
-        end_time = time.time()
-        elapsed_time = end_time - start_time
-        response = 'MOVEMENT_RESPONSE ' + command_array[1] + ' ' + ' '.join(str(value) for value in nearest_sample) + '\n'
+        elapsed_time = time.time() - start_time
+        response = "MOVEMENT_RESPONSE " + command_array[1] + ' ' + ' '.join(str(value) for value in nearest_sample) + '\n'
         print("SENDING MOVEMENT RESPONSE: " + response)
         print(f"Elapsed time: {elapsed_time} seconds")
-        conn.send(response.encode('utf-8'))
-    
+        if socket and not socket.closed:
+            socket.send_string(response)
+        else:
+            print("Socket is closed, cannot send response.")
+
+
+
 def command_handler():
     print("HANDLING COMMANDS")
     while True:
@@ -99,46 +108,51 @@ def command_handler():
         except queue.Empty:
             pass
 
-
-def command_collector():
-    print("COLLECTING COMMANDS")
-    global conn
-    global addr
-    # Create a socket
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind(('127.0.0.1', 5555))
-    server_socket.listen(1)
-
-    print("Python script: Waiting for connections...")
+def handle_client():
+    global socket
+    context = zmq.Context()
+    socket = context.socket(zmq.REP)
+    socket.bind("tcp://127.0.0.1:5555")
+    print("Connected to Unity")
+    
     while True:
-        # Accept a connection from Unity
-        conn, addr = server_socket.accept()
-        print(f"Connected to Unity at {addr}")
-        while True:
-            # Receive data from Unity
-            command = conn.recv(1024).decode('utf-8')
-            if not command:
-                break
+        print("Waiting for command...")
+        try:
+            command = socket.recv_string()  # Receive the command from Unity
+            print(f"Received command: {command}")
             commands = command.split("\n")
-            for command in commands:
-                if command:
-                    command_queue.put(command)
-            
-        conn.close()
+            for cmd in commands:
+                if cmd:
+                    command_queue.put(cmd)
+        except zmq.error.ZMQError as e:
+            print(f"ZMQError occurred: {e}")
+            break  # Break the loop if a ZMQError occurs
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+            break
+
+    print("Connection to Unity closed")
+    socket.close()  # Ensure the socket is closed
+    context.term()  # Terminate the context
 
 if __name__ == "__main__":
     global command_queue
-    
     command_queue = queue.Queue()
     load_data()
 
-    # Start the thread for collecting commands
-    collect_thread = threading.Thread(target=command_collector)
-    collect_thread.start()
+    # Iniciar el hilo para recibir comandos de Unity
+    client_thread = threading.Thread(target=handle_client)
+    client_thread.daemon = True
+    client_thread.start()
 
-    # Start the thread for handling commands
+    # Iniciar el hilo para manejar comandos
     handle_thread = threading.Thread(target=command_handler)
+    handle_thread.daemon = True
     handle_thread.start()
+
+    # Mantener el hilo principal vivo
+    client_thread.join()
+    handle_thread.join()
 
 
 
