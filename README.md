@@ -32,42 +32,50 @@ Los pasos a seguir para la ejecución del entorno virtual de pádel desde Unity 
 </ol>
 
 ## Instalación del paquete de Python
+
 Los pasos a seguir para entrenar agentes son los siguientes:
-<ol>
-    <li>Crear y activar un entorno virtual de Python en este caso usamos <a href="https://www.anaconda.com/download">Anaconda</a>:</li> 
-    <li>Desde el entorno virtual de Python, lo primero es instalar las dependencias de <code>ml-agents</code>:</li>
 
-```
-python -m pip install --upgrade pip
-pip install torch torchvision torchaudio
-pip install protobuf==3.20.3
-pip install six
-```
+1. Crear y activar un entorno virtual de Python, en este caso usamos [Anaconda](https://www.anaconda.com/download):
 
-<li>Instalar <code>ml-agents</code> y comprobar que se haya instalado correctamente:</li>
+    ```bash
+    # Comandos para crear y activar el entorno en Anaconda
+    conda create -n myenv python=3.8
+    conda activate myenv
+    ```
 
-```
-pip install mlagents
-mlagents-learn --help
-```
+2. Desde el entorno virtual de Python, lo primero es instalar las dependencias de `ml-agents`:
 
-<li>Para entrenar agentes, el comando básico es:</li>
+    ```bash
+    python -m pip install --upgrade pip
+    pip install torch torchvision torchaudio
+    pip install protobuf==3.20.3
+    pip install six
+    ```
 
-```
-mlagents-learn <trainer-config-file> --run-id=<run-identifier> --time-scale=x
-```
+3. Instalar `ml-agents` y comprobar que se haya instalado correctamente:
 
-<ul>
-    <li><code>trainer-config-file</code>: Fichero .yaml donde configura el hiperparametro de entrenamiento.</li>
-    <li><code>run-identifier</code>:Define el nombre de entrenamiento.</li>
-    <li><code>time-scale</code>: Velocidad de entrenamiento 1-20. </li>
-</ul>
+    ```bash
+    pip install mlagents
+    mlagents-learn --help
+    ```
 
-<li>Comando para visualizar las gráficas de entrenamiento: </li>
+4. Para entrenar agentes, el comando básico es:
 
-```
-tensorboard --logdir results/<run-identifier> --port 6006
-```
+    ```bash
+    mlagents-learn <trainer-config-file> --run-id=<run-identifier> --time-scale=x
+    ```
+
+    - `<trainer-config-file>`: Fichero .yaml donde se configuran los hiperparámetros de entrenamiento.
+    - `<run-identifier>`: Define el nombre del entrenamiento.
+    - `<time-scale>`: Velocidad de entrenamiento (1-20).
+
+5. Comando para visualizar las gráficas de entrenamiento:
+
+    ```bash
+    tensorboard --logdir results/<run-identifier> --port 6006
+    ```
+
+
 
 Una guía más detallada sobre cómo entrenar agentes se puede consultar [aquí](https://github.com/Unity-Technologies/ml-agents/blob/develop/docs/Training-ML-Agents.md).
 </ol>
