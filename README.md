@@ -1,6 +1,6 @@
-# Apply imitation learning using ML-agend in virtual environment of padel
+# Aprendizaje por imitación utilizando ML-agent en un entorno virtual de pádel.
 
-Project based on https://github.com/jialongjq/tfg?tab=readme-ov-file
+Proyecto basado en [Repo](https://github.com/jialongjq/tfg?tab=readme-ov-file)
 
 ## Descripción general
 Un proyecto desarrollado en Unity que permite entrenar agentes en un entorno de virtual de pádel basado en Unity, se puede entrena mediante aprendizaje por refuerzo o aprendizaje por imitación, utilizando el toolkit de
@@ -18,7 +18,7 @@ Los pasos a seguir para la ejecución del entorno virtual de pádel desde Unity 
 <ol>
 <li>Instalar la versión 2021.3.22f1 de Unity, preferiblemente a través de Unity Hub.</li>
 
-<li>Descargar la [Versión 20] (https://github.com/Unity-Technologies/ml-agents/releases/tag/release_20) de ML-Agents desde el repositorio oficial. La carpeta descargada ml-agents-release-20 contiene el paquete de Unity necesario para la ejecución del entorno.</li>
+<li>Descargar la <a href="https://github.com/Unity-Technologies/ml-agents/releases/tag/release_20">Versión 20</a> de ML-Agents desde el repositorio oficial. La carpeta descargada ml-agents-release-20 contiene el paquete de Unity necesario para la ejecución del entorno.</li>
 <li>Clonar este repositorio y abrirlo desde Unity, en Modo Seguro.</li>
 <li>Para añadir el paquete de Unity al proyecto:</li>
     <ul>
@@ -28,16 +28,14 @@ Los pasos a seguir para la ejecución del entorno virtual de pádel desde Unity 
       <li>Navegar hasta la carpeta de com.unity.ml-agents (dentro de la carpeta ml-agents-release-20)</li>
       <li>Seleccionar el archivo package.json.</li>
     </ul>
-<li>En este punto, se deberían haber detectado todos los componentes procedentes de **ML-Agents** (Agent, Behavior Parameters, Decision Requester...) y se debería poder ejecutar la escena <code>Scenes\Padel2vs2</code> .</li>
+<li>En este punto, se deberían haber detectado todos los componentes procedentes de <strong>ML-Agents</strong>  (Agent, Behavior Parameters, Decision Requester...) y se debería poder ejecutar la escena <code>Scenes\Padel2vs2</code> .</li>
 </ol>
 
-<li></li>
 ## Instalación del paquete de Python
 Los pasos a seguir para entrenar agentes son los siguientes:
 <ol>
-<li>Crear y activar un entorno virtual de Python en este caso usamos [Anaconda](https://www.anaconda.com/download):</li>
-<li>Desde el entorno virtual de Python, lo primero es instalar las dependencias de <code>ml-agents</code>:
-</li>
+    <li>Crear y activar un entorno virtual de Python en este caso usamos <a href="https://www.anaconda.com/download">Anaconda</a>:</li> 
+    <li>Desde el entorno virtual de Python, lo primero es instalar las dependencias de <code>ml-agents</code>:</li>
 
 ```
 python -m pip install --upgrade pip
@@ -69,5 +67,5 @@ mlagents-learn <trainer-config-file> --run-id=<run-identifier> --time-scale=x
 tensorboard --logdir results/<run-identifier> --port 6006
 ```
 
-Una guía más detallada sobre cómo entrenar agentes se puede consultar [aquí] (https://github.com/Unity-Technologies/ml-agents/blob/develop/docs/Training-ML-Agents.md).
+Una guía más detallada sobre cómo entrenar agentes se puede consultar [aquí](https://github.com/Unity-Technologies/ml-agents/blob/develop/docs/Training-ML-Agents.md).
 </ol>
