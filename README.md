@@ -50,11 +50,13 @@ pip install six
 pip install mlagents
 mlagents-learn --help
 ```
+
 <li>Para entrenar agentes, el comando básico es:</li>
 
 ```
 mlagents-learn <trainer-config-file> --run-id=<run-identifier> --time-scale=x
 ```
+
 <ul>
     <li><code>trainer-config-file</code>: Fichero .yaml donde configura el hiperparametro de entrenamiento.</li>
     <li><code>run-identifier</code>:Define el nombre de entrenamiento.</li>
