@@ -78,26 +78,18 @@ def process_command(command):
         start_time = time.time()
         nearest_sample = process_shot_request(command_array)
         elapsed_time = time.time() - start_time
-        response = "SHOT_RESPONSE " + command_array[1] + ' ' + ' '.join(str(value) for value in nearest_sample) + '\n'
+        response = "SHOT_RESPONSE " + command_array[1] + ' ' + ' '.join(str(value) for value in nearest_sample) 
         print("SENDING SHOT RESPONSE: " + response)
         print(f"Elapsed time: {elapsed_time} seconds")
-        if socket and not socket.closed:
-            socket.send_string(response)
-        else:
-            print("Socket is closed, cannot send response.")
+        response_socket.send_string(response)
     elif command_type == 'MOVEMENT_REQUEST':
         start_time = time.time()
         nearest_sample = process_movement_request(command_array)
         elapsed_time = time.time() - start_time
-        response = "MOVEMENT_RESPONSE " + command_array[1] + ' ' + ' '.join(str(value) for value in nearest_sample) + '\n'
+        response = "MOVEMENT_RESPONSE " + command_array[1] + ' ' + ' '.join(str(value) for value in nearest_sample)
         print("SENDING MOVEMENT RESPONSE: " + response)
         print(f"Elapsed time: {elapsed_time} seconds")
-        if socket and not socket.closed:
-            socket.send_string(response)
-        else:
-            print("Socket is closed, cannot send response.")
-
-
+        response_socket.send_string(response)
 
 def command_handler():
     print("HANDLING COMMANDS")
@@ -109,16 +101,21 @@ def command_handler():
             pass
 
 def handle_client():
-    global socket
+    global command_socket
+    global response_socket
     context = zmq.Context()
-    socket = context.socket(zmq.REP)
-    socket.bind("tcp://127.0.0.1:5555")
+
+    command_socket = context.socket(zmq.PULL)
+    command_socket.bind("tcp://127.0.0.1:5555")
+
+    response_socket = context.socket(zmq.PUB)
+    response_socket.bind("tcp://127.0.0.1:5556")
     print("Connected to Unity")
-    
+
     while True:
         print("Waiting for command...")
         try:
-            command = socket.recv_string()  # Receive the command from Unity
+            command = command_socket.recv_string()  # Receive the command from Unity
             print(f"Received command: {command}")
             commands = command.split("\n")
             for cmd in commands:
@@ -126,13 +123,13 @@ def handle_client():
                     command_queue.put(cmd)
         except zmq.error.ZMQError as e:
             print(f"ZMQError occurred: {e}")
-            break  # Break the loop if a ZMQError occurs
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
             break
 
     print("Connection to Unity closed")
-    socket.close()  # Ensure the socket is closed
+    command_socket.close()  # Ensure the socket is closed
+    response_socket.close()
     context.term()  # Terminate the context
 
 if __name__ == "__main__":
@@ -153,6 +150,5 @@ if __name__ == "__main__":
     # Mantener el hilo principal vivo
     client_thread.join()
     handle_thread.join()
-
 
 

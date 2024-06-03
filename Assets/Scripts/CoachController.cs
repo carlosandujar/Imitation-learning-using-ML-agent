@@ -13,17 +13,21 @@ using System.Linq;
 using System.Globalization;
 
 using ExcelDataReader;
-//using NumSharp;
+using NumSharp;
 using KdTree;
 using System.Runtime.InteropServices.ComTypes;
 using NetMQ;
 using NetMQ.Sockets;
 using AsyncIO;
 using UnityEditor.Search;
+using System.Net.WebSockets;
+using KdTree.Math;
+using Unity.VisualScripting.Antlr3.Runtime.Tree;
 public class CoachController : MonoBehaviour
 {
 
-    private RequestSocket client;
+    private PushSocket pushSocket;
+    private SubscriberSocket subSocket;
     private bool isConnected = false;
     private byte[] buffer = new byte[1024];
 
@@ -45,7 +49,7 @@ public class CoachController : MonoBehaviour
 
     void Start()
     {
-        //LoadData();
+        loaddata();
         if (environmentControllerX.RecordingDemonstrations)
         {
             try
@@ -53,8 +57,12 @@ public class CoachController : MonoBehaviour
 
                 // Initialize ZeroMQ client
                 AsyncIO.ForceDotNet.Force();
-                client = new RequestSocket();
-                client.Connect("tcp://127.0.0.1:5555");
+                pushSocket = new PushSocket();
+                pushSocket.Connect("tcp://127.0.0.1:5555");
+
+                subSocket = new SubscriberSocket();
+                subSocket.Connect("tcp://127.0.0.1:5556");
+                subSocket.Subscribe(""); // Subscribe to all messages
                 isConnected = true;
                 UnityEngine.Debug.Log("Connected to the server via ZeroMQ");
             }
@@ -113,14 +121,13 @@ public class CoachController : MonoBehaviour
     }
     void OnDestroy()
     {
-        if (client != null)
-        {
-            client.Close();
-            client.Dispose();
+
+            pushSocket.Close();
+            subSocket.Close();
             isConnected = false;
             NetMQConfig.Cleanup();
             UnityEngine.Debug.Log("Disconnected from the server via ZeroMQ");
-        }
+        
     }
 
     private void ProcessShotResponse(string[] response)
@@ -161,7 +168,7 @@ public class CoachController : MonoBehaviour
 
     private void ProcessMovementResponse(string[] response)
     {
-
+        UnityEngine.Debug.Log("Received: " + response[17]);
         Vector3 TLposition = new Vector3(float.Parse(response[2]) - 5, 0f, float.Parse(response[3]) - 10);
         Vector3 TRposition = new Vector3(float.Parse(response[4]) - 5, 0f, float.Parse(response[5]) - 10);
         Vector3 BLposition = new Vector3(float.Parse(response[6]) - 5, 0f, float.Parse(response[7]) - 10);
@@ -170,6 +177,7 @@ public class CoachController : MonoBehaviour
         Vector3 TRspeed = new Vector3(float.Parse(response[12]), 0f, float.Parse(response[13]));
         Vector3 BLspeed = new Vector3(float.Parse(response[14]), 0f, float.Parse(response[15]));
         Vector3 BRspeed = new Vector3(float.Parse(response[16]), 0f, float.Parse(response[17]));
+
 
 
         float Maxspeed = environmentControllerX.GetMaxspeed_Agent();
@@ -246,51 +254,33 @@ public class CoachController : MonoBehaviour
     {
         if (environmentControllerX.RecordingDemonstrations)
         {
-            if (client == null && !isConnected)
+            if (subSocket == null && !isConnected)
             {
                 // Handle disconnection or try to reconnect
                 UnityEngine.Debug.Log("Not connected to the server");
                 return;
             }
 
-            //if (stream.DataAvailable)
-            //{
-            //    if (environmentControllerX.environmentId == 0)
-            //    {
-            //        UnityEngine.Debug.Log("Recibido ");
-            //        stopwatch2.Stop();
-            //        float tiempoEjecucion = stopwatch2.ElapsedMilliseconds;
-            //        UnityEngine.Debug.Log("Tiempo de Enviar y recibir: " + tiempoEjecucion + " ms");
-            //        stopwatch2.Reset();
-            //    }
-            //    int bytesRead = stream.Read(buffer, 0, buffer.Length);
-            //    string receivedData = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-            //    string[] responses = receivedData.Split('\n');
-            //    foreach (string unsplitted_response in responses)
-            //    {
-            //        string[] response = unsplitted_response.Split(" ");
-            //        if (response[0] == "SHOT_RESPONSE")
-            //        {
-            //            ProcessShotResponse(response);
-            //        }
-            //        else if (response[0] == "MOVEMENT_RESPONSE")
-            //        {
-            //            ProcessMovementResponse(response);
-            //        }
-            //    }
-            //}
-
             if (isWaitingForResponse)
             {
                 string receivedData = string.Empty;
-                if (client.TryReceiveFrameString(out receivedData))
+                if (subSocket.TryReceiveFrameString(out receivedData))
                 {
-                    UnityEngine.Debug.Log("Received: " + receivedData);
+                    if (environmentControllerX.environmentId == 0)
+                    {
+                        UnityEngine.Debug.Log("Recibido ");
+                        stopwatch2.Stop();
+                        float tiempoEjecucion = stopwatch2.ElapsedMilliseconds;
+                        UnityEngine.Debug.Log("Tiempo de Enviar y recibir: " + tiempoEjecucion + " ms");
+                        stopwatch2.Reset();
+                    }
                     isWaitingForResponse = false; // Mark that we've received the response
                     string[] responses = receivedData.Split('\n');
                     foreach (string unsplitted_response in responses)
                     {
+                        
                         string[] response = unsplitted_response.Split(" ");
+                        UnityEngine.Debug.Log("Received: " + response);
                         if (response[0] == "SHOT_RESPONSE")
                         {
                             ProcessShotResponse(response);
@@ -319,7 +309,7 @@ public class CoachController : MonoBehaviour
         {
             isWaitingForResponse = true;
             // Send command to Python script
-            client.SendFrame(command);
+            pushSocket.SendFrame(command);
         }
     }
 
@@ -416,62 +406,134 @@ public class CoachController : MonoBehaviour
         SendCommandToPython(command);
     }
 
-    //public static DataSet dataSet;
+    public static DataSet dataset;
 
-    //public static DataTable topPositionData;
-    //public static DataTable bottomPositionData;
-    //public static DataTable topShotData;
-    //public static DataTable bottomShotData;
+    public static DataTable toppositiondata;
+    public static DataTable bottompositiondata;
+    public static DataTable topshotdata;
+    public static DataTable bottomshotdata;
+
+    private KdTree<float, int> topPositionKd;
+    private KdTree<float, int> bottomPositionKd;
+    private KdTree<float, int> topShotKd;
+    private KdTree<float, int> bottomShotKd;
 
 
-    //public void LoadData()
-    //{
-    //    string folderPath = Directory.GetCurrentDirectory()+ "\\Assets\\Scripts";
-    //    string excelFileName = "data.csv";
+    public void loaddata()
+    {
+        string folderpath = Directory.GetCurrentDirectory() + "\\assets\\scripts";
+        string excelfilename = "data.csv";
 
-    //    string excelFilePath = Path.Combine(folderPath, excelFileName);
+        string excelfilepath = Path.Combine(folderpath, excelfilename);
 
-    //    // Create a FileStream to read the Excel file
-    //    using (var stream = File.Open(excelFilePath, FileMode.Open, FileAccess.Read))
-    //    {
-    //        // Create an ExcelDataReader to read the data from the Excel file
-    //        using (var reader = ExcelReaderFactory.CreateCsvReader(stream, new ExcelReaderConfiguration()
-    //        {
-    //            FallbackEncoding = Encoding.GetEncoding(1252), // Encoding for Western European (Windows)
-    //            AutodetectSeparators = new char[] { ',', ';', '\t' }, // Autodetect separators
-    //            LeaveOpen = false // Close the reader after data is read
-    //        }))
-    //        {
-    //            // Read the data into a DataSet
-    //            DataSet result = reader.AsDataSet(new ExcelDataSetConfiguration()
-    //            {
-    //                ConfigureDataTable = (_) => new ExcelDataTableConfiguration()
-    //                {
-    //                    UseHeaderRow = true // Treat the first row as header (containing column names)
-    //                }
-    //            });
+        // create a filestream to read the excel file
+        using (var stream = File.Open(excelfilepath, FileMode.Open, FileAccess.Read))
+        {
+            // create an exceldatareader to read the data from the excel file
+            using (var reader = ExcelReaderFactory.CreateCsvReader(stream, new ExcelReaderConfiguration()
+            {
+                FallbackEncoding = Encoding.GetEncoding(1252), // encoding for western european (windows)
+                AutodetectSeparators = new char[] { ',', ';', '\t' }, // autodetect separators
+                LeaveOpen = false // close the reader after data is read
+            }))
+            {
+                // read the data into a dataset
+                DataSet result = reader.AsDataSet(new ExcelDataSetConfiguration()
+                {
+                    ConfigureDataTable = (_) => new ExcelDataTableConfiguration()
+                    {
+                        UseHeaderRow = true // treat the first row as header (containing column names)
+                    }
+                });
 
-    //            // Extract the DataTable from the DataSet
-    //            DataTable data = result.Tables[0];
+                // extract the datatable from the dataset
+                DataTable data = result.Tables[0];
 
-    //            // Remove unnecessary columns
-    //            string[] columnsToDrop = { "Column0", "frame", "time", "role1", "role2", "role3", "role4", "fromx", "fromy", "duration", "shot_full", "rally" };
-    //            foreach (string column in columnsToDrop)
-    //            {
-    //                if (data.Columns.Contains(column))
-    //                {
-    //                    data.Columns.Remove(column);
-    //                }
-    //            }
+                // remove unnecessary columns
+                string[] columnstodrop = { "column0", "frame", "time", "role1", "role2", "role3", "role4", "fromx", "fromy", "duration", "shot_full", "rally" };
+                foreach (string column in columnstodrop)
+                {
+                    var colums = data.Columns;
+                    if (data.Columns.Contains(column))
+                    {
+                        data.Columns.Remove(column);
+                    }
+                }
 
-    //            // Filter data by column
-    //            topPositionData = data.AsEnumerable().Where(row => row.Field<string>("lastHit") == "T").CopyToDataTable();
-    //            bottomPositionData = data.AsEnumerable().Where(row => row.Field<string>("lastHit") == "B").CopyToDataTable();
-    //            topShotData = topPositionData.AsEnumerable().Where(row => row.Field<string>("shot") != "undef").CopyToDataTable();
-    //            bottomShotData = bottomPositionData.AsEnumerable().Where(row => row.Field<string>("shot") != "undef").CopyToDataTable();
-    //        }
-    //    }
+                // filter data by column
+                toppositiondata = data.AsEnumerable().Where(row => row.Field<string>("lasthit") == "T").CopyToDataTable();
+                bottompositiondata = data.AsEnumerable().Where(row => row.Field<string>("lasthit") == "B").CopyToDataTable();
+                topshotdata = toppositiondata.AsEnumerable().Where(row => row.Field<string>("shot") != "undef").CopyToDataTable();
+                bottomshotdata = bottompositiondata.AsEnumerable().Where(row => row.Field<string>("shot") != "undef").CopyToDataTable();
+            }
+        }
+        // Convert DataTables to arrays and handle potential format issues
+        var topPositionArray = ConvertDataTableToArray(toppositiondata);
+        var bottomPositionArray = ConvertDataTableToArray(bottompositiondata);
+        var topShotArray = ConvertDataTableToArray(topshotdata);
+        var bottomShotArray = ConvertDataTableToArray(bottomshotdata);
 
-    //}
+        // Create KD-Trees
+        topPositionKd = new KdTree<float, int>(10, new FloatMath());
+        bottomPositionKd = new KdTree<float, int>(10, new FloatMath());
+        topShotKd = new KdTree<float, int>(10, new FloatMath());
+        bottomShotKd = new KdTree<float, int>(10, new FloatMath());
+
+        // Add data to KD-Trees
+        AddToKdTree(topPositionKd, topPositionArray);
+        AddToKdTree(bottomPositionKd, bottomPositionArray);
+        AddToKdTree(topShotKd, topShotArray);
+        AddToKdTree(bottomShotKd, bottomShotArray);
+
+        // Definir la entrada que deseas buscar
+        float[] input = new float[] { 2.635495f, 17.85289f, 7.526091f, 17.80171f, 2.473909f, 2.198291f, 7.364505f, 2.147109f, 7.268257f, 3.667419f };
+
+        // Realizar la búsqueda en el KD-Tree
+        int index = bottomPositionKd.GetNearestNeighbours(input, 1)[0].Value;
+
+        // El resultado es una lista de pares (distancia, valor) donde el primer elemento es el vecino más cercano.
+        //       x1          y1              x2           y2             x3          y3         x4            y4         ballx       bally         speed1x               speed1y             speed2x              speed2y                speed3x                speed3y                speed4x              speed4y       shot   targetx      targety  lastHit 
+        //    1.8934433   18.281116       7.491527    13.353693      2.5034525   1.6021669    7.8704643   1.6626282   1.8934433   18.281116 - 0.817142999999998 - 0.38988000000003353 - 0.00509099999999485 - 0.03843000000001595 - 0.13817999999999664 - 0.31243800000000155    0.1493309999999859 - 1.2000599999999961 normal  8.978129    2.1132438  Serve T   
+
+        var raw = bottompositiondata.Rows[index].ItemArray;
+
+
+
+    }
+    private void AddToKdTree(KdTree<float, int> kdTree, float[][] data)
+    {
+        for (int i = 0; i < data.Length; i++)
+        {
+            kdTree.Add(data[i].Take(10).ToArray(), i); // Utiliza el índice como valor entero
+        }
+    }
+
+    private float[][] ConvertDataTableToArray(DataTable dataTable)
+    {
+        List<float[]> dataArray = new List<float[]>();
+
+        foreach (DataRow row in dataTable.Rows)
+        {
+            List<float> rowArray = new List<float>();
+
+            foreach (var item in row.ItemArray)
+            {
+                if (float.TryParse(item.ToString(), out float value))
+                {
+                    rowArray.Add(value);
+                }
+                else
+                {
+                    // Handle or log the invalid format value
+                    UnityEngine.Debug.LogWarning($"Invalid value '{item}' in row. Defaulting to 0.");
+                    rowArray.Add(0); // or handle as needed
+                }
+            }
+
+            dataArray.Add(rowArray.ToArray());
+        }
+
+        return dataArray.ToArray();
+    }
 
 }

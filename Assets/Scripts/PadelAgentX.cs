@@ -213,7 +213,7 @@ public class PadelAgentX : Agent
         var zGrid = discreteActions[3];
         var hitType = discreteActions[4];
 
-        //UnityEngine.Debug.Log("agent : " + playerId + "targetX: " + targetX + "targetZ: " + targetZ);
+        UnityEngine.Debug.Log("agent : " + playerId + "targetX: " + targetX + "targetZ: " + targetZ);
 
         float xTarget = -2 * (10f / 6) + (10f / 6) * targetX;
         float zTarget = -((10f / 6) + (10f / 6) * targetZ);
