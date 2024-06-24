@@ -1,0 +1,66 @@
+{
+    "PadelAgent": {
+        "checkpoints": [
+            {
+                "steps": 8499996,
+                "file_path": "results\\All_activated\\PadelAgent\\PadelAgent-8499996.onnx",
+                "reward": 2.164602813513383,
+                "creation_time": 1715639836.9257565,
+                "auxillary_file_paths": [
+                    "results\\All_activated\\PadelAgent\\PadelAgent-8499996.pt"
+                ]
+            },
+            {
+                "steps": 8999992,
+                "file_path": "results\\All_activated\\PadelAgent\\PadelAgent-8999992.onnx",
+                "reward": 1.575882496848564,
+                "creation_time": 1715640210.1766586,
+                "auxillary_file_paths": [
+                    "results\\All_activated\\PadelAgent\\PadelAgent-8999992.pt"
+                ]
+            },
+            {
+                "steps": 9499985,
+                "file_path": "results\\All_activated\\PadelAgent\\PadelAgent-9499985.onnx",
+                "reward": 1.6541268449080617,
+                "creation_time": 1715640585.4565003,
+                "auxillary_file_paths": [
+                    "results\\All_activated\\PadelAgent\\PadelAgent-9499985.pt"
+                ]
+            },
+            {
+                "steps": 9999992,
+                "file_path": "results\\All_activated\\PadelAgent\\PadelAgent-9999992.onnx",
+                "reward": 1.3089599173409598,
+                "creation_time": 1715640943.4748805,
+                "auxillary_file_paths": [
+                    "results\\All_activated\\PadelAgent\\PadelAgent-9999992.pt"
+                ]
+            },
+            {
+                "steps": 10000038,
+                "file_path": "results\\All_activated\\PadelAgent\\PadelAgent-10000038.onnx",
+                "reward": 1.247312217950821,
+                "creation_time": 1715640943.5548797,
+                "auxillary_file_paths": [
+                    "results\\All_activated\\PadelAgent\\PadelAgent-10000038.pt"
+                ]
+            }
+        ],
+        "elo": 1323.817617252232,
+        "final_checkpoint": {
+            "steps": 10000038,
+            "file_path": "results\\All_activated\\PadelAgent.onnx",
+            "reward": 1.247312217950821,
+            "creation_time": 1715640943.5548797,
+            "auxillary_file_paths": [
+                "results\\All_activated\\PadelAgent\\PadelAgent-10000038.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.29.0",
+        "torch_version": "1.13.1+cpu"
+    }
+}

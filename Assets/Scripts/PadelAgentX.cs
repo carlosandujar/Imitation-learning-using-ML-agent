@@ -36,12 +36,8 @@ public class PadelAgentX : Agent
     public Transform teammateTransform, opponent1Transform, opponent2Transform;
     private bool ballOnRange;
     public Vector3 previousPos;
-    ActionSpec actionspec;
 
-    Stopwatch stopwatch;
-    Stopwatch stopwatch2;
 
-    private Vector2 PreviousMovement;
 
     public bool speedControl = false;
     public bool heightControl = false;
@@ -73,8 +69,6 @@ public class PadelAgentX : Agent
         ballOnRange = false;
         canMove = false;
 
-        stopwatch = new Stopwatch();
-        stopwatch2 = new Stopwatch();
     }
 
     // Update is called once per frame
@@ -195,25 +189,12 @@ public class PadelAgentX : Agent
 
     public void MoveAgent(ActionSegment<int> discreteActions, ActionSegment<float> ContinuousActions)
     {
-        var targetX = 0f;
-        var targetZ = 0f;
-
-        if (pendingMovementRequest && environmentController.RecordingDemonstrations)
-        {
-            targetX = PreviousMovement[0];
-            targetZ = PreviousMovement[1];
-        }
-        else
-        {
-            targetX = discreteActions[0];
-            targetZ = discreteActions[1];
-        }
-
+        var targetX = discreteActions[0];
+        var targetZ = discreteActions[1];
         var xGrid = discreteActions[2];
         var zGrid = discreteActions[3];
         var hitType = discreteActions[4];
 
-        UnityEngine.Debug.Log("agent : " + playerId + "targetX: " + targetX + "targetZ: " + targetZ);
 
         float xTarget = -2 * (10f / 6) + (10f / 6) * targetX;
         float zTarget = -((10f / 6) + (10f / 6) * targetZ);
@@ -263,6 +244,13 @@ public class PadelAgentX : Agent
         Vector3 movement = direction * speed;
         characterController.Move(movement * Time.fixedDeltaTime);
 
+        if (characterController.transform.localPosition.y > 0.875f)
+        {
+            Vector3 newPosition = this.transform.localPosition;
+            newPosition.y = 0.875f;
+            this.transform.localPosition = newPosition;
+        }
+
         float hitHeight = 0;
 
         
@@ -284,7 +272,7 @@ public class PadelAgentX : Agent
                     else hitHeight = Mathf.Clamp(ContinuousActions[0], 1.25f, 4);
                 } else hitHeight = 1.5f;
                 break;
-            // cortado
+            // Slice
             case 2:
                 if (heightControl)
                 {
@@ -336,12 +324,6 @@ public class PadelAgentX : Agent
 
     public void SetMovement(int[] movement)
     {
-        if (environmentController.environmentId == 0)
-        {
-            stopwatch.Stop();
-            float tiempoEjecucion = stopwatch.ElapsedMilliseconds;
-            UnityEngine.Debug.Log("Tiempo de total" + playerId + ": " + tiempoEjecucion + " ms");
-        }
         this.movement = movement;
         movementReceived = true;
     }
@@ -361,15 +343,10 @@ public class PadelAgentX : Agent
     {
         if (environmentController.RecordingDemonstrations && canMove)
         {
-            UnityEngine.Debug.Log("Heuristic" + playerId);
+         
             // MOVEMENT REQUEST
             if (!pendingMovementRequest)
             {
-                if (environmentController.environmentId == 0)
-                {
-                    UnityEngine.Debug.Log("Enviado " + playerId);
-                    stopwatch.Start();
-                }
                 environmentController.RequestCoachedMovement(
                     playerId,
                     transform.localPosition,
@@ -378,6 +355,7 @@ public class PadelAgentX : Agent
                     opponent2Transform.localPosition,
                     ballRb.transform.localPosition,
                     environmentController.GetLastHitByTeam());
+
                 pendingMovementRequest = true;
             }
             bool ballIsHittable = ballOnRange && ballRb.transform.localPosition.y > 0.25
@@ -399,17 +377,9 @@ public class PadelAgentX : Agent
             // MAKE MOVEMENT
             if (movementReceived)
             {
-                if (environmentController.environmentId == 0)
-                {
-                    stopwatch.Stop();
-                    float tiempoEjecucion = stopwatch.ElapsedMilliseconds;
-                    UnityEngine.Debug.Log("Tiempo de recibir " + playerId + ": " + tiempoEjecucion + " ms");
-                    stopwatch.Reset();
-                }
                 var discreteActionsOut = actionsOut.DiscreteActions;
                 discreteActionsOut[0] = movement[0]; // xgrid [0..4]
                 discreteActionsOut[1] = movement[1]; // zgrid [0..4]
-                PreviousMovement = new Vector2(movement[0], movement[1]);
                 movementReceived = false;
                 pendingMovementRequest = false;
             }
@@ -424,7 +394,7 @@ public class PadelAgentX : Agent
                 {
                     shot[2] = 1;
                 }
-                discreteActionsOut[4] = shot[2]; // hitType: 0 no hit, 1 derecha/reves, 2 globo, 3 remate
+                discreteActionsOut[4] = shot[2]; // hitType: 0 no hit, 1 derecha/reves, 4 globo, 5 remate
                 shotReceived = false;
                 pendingShotRequest = false;
                 shot[2] = 0;

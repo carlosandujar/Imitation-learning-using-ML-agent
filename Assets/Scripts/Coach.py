@@ -25,7 +25,8 @@ def load_data():
     data = pd.read_excel(excel_file_path)
     columns_to_drop = ['Unnamed: 0', 'frame', 'time', 'role1', 'role2', 'role3', 'role4', 'fromx' , 'fromy' ,'duration', 'shot_full', 'rally']
     data = data.drop(columns=columns_to_drop)
-
+    data.to_excel('nombre_del_archivo.xlsx', index=False)
+    
     # Filter data by column
     # Top position data -> 'last hit' == 'T'
     top_position_data = data[data['lastHit'] == 'T']
