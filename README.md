@@ -1,49 +1,52 @@
-# Aprendizaje por imitación utilizando ML-agent en un entorno virtual de pádel.
+# Reinforcement Learning and Imitation Learning using ML-Agents in a Virtual Padel Environment
 
-Proyecto basado en [Repo](https://github.com/jialongjq/tfg?tab=readme-ov-file)
+Project based on [Repository] (https://github.com/jialongjq/tfg?tab=readme-ov-file)
 
-## Descripción general
-Un proyecto desarrollado en Unity que permite entrenar agentes en un entorno de virtual de pádel basado en Unity, se puede entrena mediante aprendizaje por refuerzo o aprendizaje por imitación, utilizando el toolkit de
-[Unity ML-Agents](https://github.com/Unity-Technologies/ml-agents). 
+## Overview
 
-Los directorios <code>Assets</code>, <code>Packages</code>, <code>Project Settings</code> y <code>User Settings</code> son los necesarios para abrir el proyecto en Unity.
+This project is developed in Unity and allows training agents in a virtual padel environment based on Unity, utilizing either reinforcement learning or imitation learning, with the help of the [Unity ML-Agents](https://github.com/Unity-Technologies/ml-agents) toolkit.
 
-El directorio <code>config</code> contiene los archivos de configuración del entrenamiento de agentes en el entorno virtual de pádel.
+The directories <code>Assets</code>, <code>Packages</code>, <code>Project Settings</code>, and <code>User Settings</code> are necessary to open the project in Unity.
 
-## Requerimientos
-Este proyecto se ha probado únicamente en Windows 10 y 11. Para la ejecución del proyecto se requiere la versión 2021.3.22f1 de Unity y la versión 20 de ML-Agents. Para el entrenamiento de agentes se requiere la versión 3.7.9 de Python (otras versiones compatibles: 3.9).
+The <code>results</code> directory contains the configuration files for training agents in the virtual environment, it also contains already trained models.
 
-## Instalación del proyecto en Unity
-Los pasos a seguir para la ejecución del entorno virtual de pádel desde Unity son los siguientes:
-<ol>
-<li>Instalar la versión 2021.3.22f1 de Unity, preferiblemente a través de Unity Hub.</li>
+The <code>demos</code> directory contains different videos of the training results.
 
-<li>Descargar la <a href="https://github.com/Unity-Technologies/ml-agents/releases/tag/release_20">Versión 20</a> de ML-Agents desde el repositorio oficial. La carpeta descargada ml-agents-release-20 contiene el paquete de Unity necesario para la ejecución del entorno.</li>
-<li>Clonar este repositorio y abrirlo desde Unity, en Modo Seguro.</li>
-<li>Para añadir el paquete de Unity al proyecto:</li>
-    <ul>
-      <li>Navegar hasta el menú Window -> Package Manager.</li>
-      <li>Hacer click al botón + (situado en esquina superior izquierda del menú)</li>
-      <li>Seleccionar Add package from disk...</li>
-      <li>Navegar hasta la carpeta de com.unity.ml-agents (dentro de la carpeta ml-agents-release-20)</li>
-      <li>Seleccionar el archivo package.json.</li>
-    </ul>
-<li>En este punto, se deberían haber detectado todos los componentes procedentes de <strong>ML-Agents</strong>  (Agent, Behavior Parameters, Decision Requester...) y se debería poder ejecutar la escena <code>Scenes\Padel2vs2</code> .</li>
-</ol>
+## Requirements
+This project has been tested only on Windows 10 and 11. To run the project, Unity version 2021.3.22f1 and ML-Agents version 20 are required. For agent training, Python version 3.7.9 is needed (other compatible versions: 3.9).
 
-## Instalación del paquete de Python
+## Project Installation in Unity
 
-Los pasos a seguir para entrenar agentes son los siguientes:
+To run the virtual padel environment from Unity, follow these steps:
 
-1. Crear y activar un entorno virtual de Python, en este caso usamos [Anaconda](https://www.anaconda.com/download):
+1. Install Unity version 2021.3.22f1, preferably via Unity Hub.
+
+2. Download [ML-Agents Version 20](https://github.com/Unity-Technologies/ml-agents/releases/tag/release_20) from the official repository. The downloaded folder `ml-agents-release-20` contains the Unity package necessary for running the environment.
+
+3. Clone this repository and open it from Unity in Safe Mode.
+
+4. To add the Unity package to the project:
+    - Navigate to the menu `Window -> Package Manager`.
+    - Click the `+` button (located in the top left corner of the menu).
+    - Select `Add package from disk...`.
+    - Navigate to the `com.unity.ml-agents` folder (inside the `ml-agents-release-20` folder).
+    - Select the `package.json` file.
+
+5. At this point, all components from **ML-Agents** (Agent, Behavior Parameters, Decision Requester, etc.) should be detected, and the scene `Scenes\Padel2vs2` should be ready to run.
+
+## Python Package Installation
+
+To train agents, follow these steps:
+
+1. Create and activate a Python virtual environment; in this case, we use [Anaconda](https://www.anaconda.com/download):
 
     ```bash
-    # Comandos para crear y activar el entorno en Anaconda
+    # Commands to create and activate the environment in Anaconda
     conda create -n myenv python=3.8
     conda activate myenv
     ```
 
-2. Desde el entorno virtual de Python, lo primero es instalar las dependencias de `ml-agents`:
+2. From the Python virtual environment, first install the `ml-agents` dependencies:
 
     ```bash
     python -m pip install --upgrade pip
@@ -52,30 +55,27 @@ Los pasos a seguir para entrenar agentes son los siguientes:
     pip install six
     ```
 
-3. Instalar `ml-agents` y comprobar que se haya instalado correctamente:
+3. Install `ml-agents` and verify that it has been installed correctly:
 
     ```bash
     pip install mlagents
     mlagents-learn --help
     ```
 
-4. Para entrenar agentes, el comando básico es:
+4. To train agents, the basic command is:
 
     ```bash
     mlagents-learn <trainer-config-file> --run-id=<run-identifier> --time-scale=x
     ```
 
-    - `<trainer-config-file>`: Fichero .yaml donde se configuran los hiperparámetros de entrenamiento.
-    - `<run-identifier>`: Define el nombre del entrenamiento.
-    - `<time-scale>`: Velocidad de entrenamiento (1-20).
+    - `<trainer-config-file>`: YAML file where training hyperparameters are configured.
+    - `<run-identifier>`: Defines the training name.
+    - `<time-scale>`: Training speed (1-20).
 
-5. Comando para visualizar las gráficas de entrenamiento:
+5. Command to visualize training graphs:
 
     ```bash
     tensorboard --logdir results/<run-identifier> --port 6006
     ```
 
-
-
-Una guía más detallada sobre cómo entrenar agentes se puede consultar [aquí](https://github.com/Unity-Technologies/ml-agents/blob/develop/docs/Training-ML-Agents.md).
-</ol>
+A more detailed guide on how to train agents can be found [here](https://github.com/Unity-Technologies/ml-agents/blob/develop/docs/Training-ML-Agents.md).
