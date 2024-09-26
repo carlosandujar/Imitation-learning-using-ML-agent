@@ -1,6 +1,6 @@
 # Reinforcement Learning and Imitation Learning using ML-Agents in a Virtual Padel Environment
 
-Project based on [Repository] (https://github.com/jialongjq/tfg?tab=readme-ov-file)
+Project based on [Repository](https://github.com/jialongjq/tfg?tab=readme-ov-file)
 
 ## Overview
 
@@ -8,7 +8,7 @@ This project is developed in Unity and allows training agents in a virtual padel
 
 The directories <code>Assets</code>, <code>Packages</code>, <code>Project Settings</code>, and <code>User Settings</code> are necessary to open the project in Unity.
 
-The <code>results</code> directory contains the configuration files for training agents in the virtual environment, it also contains already trained models.
+The <code>results and config</code> directory contains the configuration files for training agents in the virtual environment, it also contains already trained models.
 
 The <code>demos</code> directory contains different videos of the training results.
 
