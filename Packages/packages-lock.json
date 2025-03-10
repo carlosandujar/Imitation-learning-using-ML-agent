@@ -12,7 +12,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.burst": {
-      "version": "1.6.6",
+      "version": "1.8.11",
       "depth": 2,
       "source": "registry",
       "dependencies": {
@@ -21,7 +21,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.collab-proxy": {
-      "version": "2.0.1",
+      "version": "2.2.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
@@ -35,7 +35,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.ide.rider": {
-      "version": "3.0.18",
+      "version": "3.0.27",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -44,7 +44,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.ide.visualstudio": {
-      "version": "2.0.17",
+      "version": "2.0.22",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -67,17 +67,18 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.ml-agents": {
-      "version": "file:C:/Users/wenqi zhou/tfg/ml-agents-release_20/com.unity.ml-agents",
+      "version": "git+https://github.com/Unity-Technologies/ml-agents.git?path=com.unity.ml-agents#release_20",
       "depth": 0,
-      "source": "local",
+      "source": "git",
       "dependencies": {
         "com.unity.barracuda": "3.0.0",
         "com.unity.modules.imageconversion": "1.0.0",
         "com.unity.modules.jsonserialize": "1.0.0"
-      }
+      },
+      "hash": "89a6357016f4bd685bb0004f83a3a1c2b27a0e05"
     },
     "com.unity.test-framework": {
-      "version": "1.1.31",
+      "version": "1.1.33",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -97,7 +98,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.timeline": {
-      "version": "1.6.4",
+      "version": "1.6.5",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -118,7 +119,7 @@
       }
     },
     "com.unity.visualscripting": {
-      "version": "1.8.0",
+      "version": "1.9.1",
       "depth": 0,
       "source": "registry",
       "dependencies": {
