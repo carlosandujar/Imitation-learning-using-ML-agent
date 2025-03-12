@@ -170,7 +170,7 @@ public class PadelAgentX : Agent
         {
             if (this.team == Team.T1 && this.playerId == PlayerId.T1_1)  // T1_1 saves the states for all players
             {
-                environmentController.logger.LogState(
+                environmentController.logger.LogState((float)this.role, 
                     new Vector3[] { transform.localPosition, teammateTransform.localPosition, opponent1Transform.localPosition, opponent2Transform.localPosition }, ballRb.transform.localPosition);
             }
         }
@@ -214,13 +214,7 @@ public class PadelAgentX : Agent
             ballTargetZ *= -1;
         }
 
-        // Log Action
-        if (environmentController.logEnabled && environmentController.environmentId == 0)
-        {
-            environmentController.logger.LogAction((int)this.team, (int)this.playerId,  xTarget, zTarget, ballTargetX, ballTargetZ, hitType, 
-                    new Vector3[] { transform.localPosition, teammateTransform.localPosition, opponent1Transform.localPosition, opponent2Transform.localPosition });
-        }
-
+       
 
 
         Vector3 targetPos = new Vector3(xTarget,0f, zTarget);
@@ -242,6 +236,22 @@ public class PadelAgentX : Agent
             AddReward(reward);
         }
         Vector3 movement = direction * speed;
+        
+        
+        if (true)
+        {
+            if (magnitude < 0.1f) // avoid micro movements
+            {
+                movement = Vector3.zero;
+            }
+            
+            // decrease speed if close to target
+            const float MAX = 3.0f;
+            if (this.role!= Role.Receiver && magnitude < MAX)
+            {
+                movement = direction * speed * Mathf.Pow(magnitude / MAX, 1.2f) * 0.8f;
+            }
+        }
         characterController.Move(movement * Time.fixedDeltaTime);
 
         if (characterController.transform.localPosition.y > 0.875f)
@@ -252,6 +262,25 @@ public class PadelAgentX : Agent
         }
 
         float hitHeight = 0;
+
+
+         // Log Action; only for the first environment (id=0)
+        if (environmentController.logEnabled && environmentController.environmentId == 0)
+        {
+            bool ballIsHittable = ballOnRange && ballRb.transform.localPosition.y > 0.25 && environmentController.GetLastHitByTeam() != team && hitType != 0 && !environmentController.BallIsLocked() && !environmentController.PointJustGiven();     
+            
+            if (! ballIsHittable)
+            {
+                hitType = 0;
+                ballTargetX = -1;
+                ballTargetZ = -1;
+            }
+            environmentController.logger.LogAction((int)this.team, (int)this.playerId,  xTarget, zTarget, movement.x, movement.z, ballTargetX, ballTargetZ, hitType, 
+                    new Vector3[] { transform.localPosition, teammateTransform.localPosition, opponent1Transform.localPosition, opponent2Transform.localPosition });
+        }
+
+
+
 
         
         bool hitBall = true;
@@ -317,6 +346,7 @@ public class PadelAgentX : Agent
                 environmentController.HitBall(team, hitForce, hitType);
             }
         }
+        
     }
 
     private int[] movement = null;

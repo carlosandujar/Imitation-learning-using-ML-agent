@@ -8,15 +8,87 @@ import numpy as np
 
 # P1: player self
 # P2: teamate
-# P1: opponent 1
-# P1: opponent 2
+# P3: opponent 1
+# P4: opponent 2
 PATH = "c:/temp/"
-COLUMNS_STATE_FILE = ["Date", "Seconds", "P1x", "P1z", "P2x", "P2z", "P3x", "P3z", "P4x", "P4z", "Ballx", "Ballz"]
+COLUMNS_STATE_FILE = ["Date", "Seconds", "Role", "P1x", "P1z", "P2x", "P2z", "P3x", "P3z", "P4x", "P4z", "Ballx", "Bally", "Ballz"]
 COLUMNS_ACTION_FILE = ["Date", "Seconds", "Team", "Player", "Mov X", "Mov Z", "Target x", "Target z", "Shot", "P1x", "P1z", "P2x", "P2z", "P3x", "P3z", "P4x", "P4z"]
 def states(file, stat):
-    df = pd.read_csv(file, delimiter=";", decimal=".", index_col=False, names=["Date", "Seconds", "P1x", "P1z", "P2x", "P2z", "P3x", "P3z", "P4x", "P4z", "Ballx", "Ballz"])
+    df = pd.read_csv(file, delimiter=";", decimal=",", index_col=False, names=["Date", "Seconds", "Role", "P1x", "P1z", "P2x", "P2z", "P3x", "P3z", "P4x", "P4z", "Ballx", "Bally", "Ballz"])
     print(df.describe())
     print(df)
+
+    # remove first 80 rows
+    df = df.iloc[80:]
+    print(df)
+    # reindex
+    df = df.reset_index(drop=True)
+
+    # remove one every 5 rows
+    df = df[df.index % 5 == 0]
+    df = df.reset_index(drop=True)
+
+
+    print("FILTERED:")
+    print(df)
+    
+
+    # convert to centimeters
+    if False:
+        df["P1x"] = df["P1x"]*100
+        df["P1z"] = df["P1z"]*100
+        df["P2x"] = df["P2x"]*100
+        df["P2z"] = df["P2z"]*100
+        df["P3x"] = df["P3x"]*100
+        df["P3z"] = df["P3z"]*100
+        df["P4x"] = df["P4x"]*100
+        df["P4z"] = df["P4z"]*100
+        df["Ballx"] = df["Ballx"]*100
+        df["Ballz"] = df["Ballz"]*100
+
+    # convert to integer
+    '''
+    df["P1x"] = df["P1x"].astype(int)
+    df["P1z"] = df["P1z"].astype(int)
+    df["P2x"] = df["P2x"].astype(int)
+    df["P2z"] = df["P2z"].astype(int)
+    df["P3x"] = df["P3x"].astype(int)
+    df["P3z"] = df["P3z"].astype(int)
+    df["P4x"] = df["P4x"].astype(int)
+    df["P4z"] = df["P4z"].astype(int)
+    df["Ballx"] = df["Ballx"].astype(int)
+    df["Ballz"] = df["Ballz"].astype(int)
+    '''
+    
+    print("CONVERTED:")
+    print(df)
+    print(df.columns)
+
+
+
+
+    # Add row with time in seconds since start
+    df["Seconds"] = (df["Seconds"] - df["Seconds"].iloc[0])/1000
+    print(df)   
+    
+    # sort columns
+    df = df[["Seconds", "Role", "P1x", "P1z", "P2x", "P2z", "P3x", "P3z", "P4x", "P4z", "Ballx", "Ballz"]]  
+    # rename columns
+    df = df.rename(columns={"P1x": "Self x", "P1z": "Self y", "P2x": "Partner x", "P2z": "Partner y", "P3x": "Oppo1 x", "P3z": "Oppo1 y", "P4x": "Oppo2 x", "P4z": "Oppo2 y", "Ballx": "Ball x", "Ballz": "Ball y"})
+    
+    # get first n rows
+    df = df.iloc[:15]
+    
+    # seconds column with 1 decimal
+    df["Seconds"] = df["Seconds"].round(1)
+    print(df)
+    df = df.style.format(decimal='.', thousands='', precision=2)
+    # hide index
+    df = df.hide(axis="index")
+    # fancy latex table
+    df.to_latex("c:/temp/observations.tex")
+
+    return
 
     df = df.iloc[:20000]
     if stat=="inter-distance":
@@ -89,10 +161,60 @@ def states(file, stat):
     '''
 
 def action(file):
-    df = pd.read_csv(file, delimiter=";", decimal=".", index_col=False, names=["Date", "Seconds", "Team", "Player", "Mov X", "Mov Z", "Target x", "Target z", "Shot", "P1x", "P1z", "P2x", "P2z", "P3x", "P3z", "P4x", "P4z"])
+    df = pd.read_csv(file, delimiter=";", decimal=",", index_col=False, names=["Date", "Seconds", "Team", "Player", "Target x", "Target z", "Mov X", "Mov Z", "Ball x", "Ball z", "Shot"])
     print(df.describe())
     print(df)
 
+    # rows[i] = $"{actions[i].time};{actions[i].seconds};{actions[i].team};{actions[i].player % 2};{actions[i].Xpos};{actions[i].Zpos};{actions[i].moveX};{actions[i].moveZ};{actions[i].xGrid};{actions[i].zGrid};{actions[i].hitType};";
+            
+
+    # remove first 80 rows
+    df = df.iloc[4*80:]
+    print(df)
+    # reindex
+    df = df.reset_index(drop=True)
+
+    # get only rows for Team 1
+    df = df[df["Team"]==1]
+    # get only rows for Player 1
+    df = df[df["Player"]==0]    
+    df = df.reset_index(drop=True)
+
+    # remove one every 5 rows
+    df = df[df.index % 25 == 0] #
+    df = df.reset_index(drop=True)
+    print(df)
+
+     # Add row with time in seconds since start
+    df["Seconds"] = (df["Seconds"] - df["Seconds"].iloc[0])/1000
+    print(df)   
+    
+    # sort columns
+    #df = df[["Seconds", "Team", "Player", "Mov X", "Mov Z", "Target x", "Target z", "Shot", "P1x", "P1z", "P2x", "P2z", "P3x", "P3z", "P4x", "P4z"]]
+    #df = df[["Seconds", "Mov X", "Mov Z", "Target x", "Target z", "Shot", "Ball x", "Ball z"]]
+    df = df[["Seconds", "Mov X", "Mov Z", "Shot", "Ball x", "Ball z"]]
+    df["Mov X"] = df["Mov X"]*0.02 # fixed delta time
+    df["Mov Z"] = df["Mov Z"]*0.02 # fixed delta time
+    # rename columns
+    df = df.rename(columns={"Mov X": "Move x", "Mov Z": "Move y", "Ball x": "Ball target x", "Ball z": "Ball target y"})
+    print(df)
+
+    
+
+    # get first n rows
+    df = df.iloc[:15]  # 15
+    
+    # seconds column with 1 decimal
+    df["Seconds"] = df["Seconds"].round(1)
+    print(df)
+    df = df.style.format(decimal='.', thousands='', precision=2)
+    # hide index
+    df = df.hide(axis="index")
+    # fancy latex table
+    df.to_latex("c:/temp/actions.tex")
+
+
+    return
     df = df.iloc[:20000]
 
     def classify_distance(value):
@@ -233,5 +355,5 @@ def compare_model_actions(models, variable):
 #models = [("92", "3 m/s"), ("91", "4 m/s"), ("93", "6 m/s")] #, ("-untrained", "learners")  # (model, value)
 #compare_models(models, "Max speed")
 #compare_model_actions(models, "Max speed")
-states("c:/temp/stateLog.csv", "x")
-action("c:/temp/actionLog.csv")
+#states("c:/temp/stateLog-RL-rand.csv", "x")
+action("c:/temp/actionLog-RL-rand.csv")

@@ -69,6 +69,13 @@ public class EnvironmentControllerX : MonoBehaviour
                 trajectoryController.ClearTrajectory();
             }
         }
+        // key 'L' to enable/disable log
+        if (Input.GetKeyDown(KeyCode.L) && environmentId == 0)
+        {
+            logEnabled = !logEnabled;
+            // output to console
+            Debug.Log("Log enabled: " + logEnabled);
+        }
     }
 
     public void SetSimulationCompleted(bool simulationCompleted)
@@ -298,12 +305,14 @@ public class Action
     public int player;
     public float Zpos;
     public float Xpos;
+    public float moveX;
+    public float moveZ;
     public float xGrid;
     public float zGrid;
     public int hitType;
     public Vector3[] playerPositions;
 
-    public Action(string _time, long _seconds, int _team, int _player, float _Zpos, float _Xpos, float x, float z, int type, Vector3[] _playerPositions)
+    public Action(string _time, long _seconds, int _team, int _player, float _Xpos, float _Zpos, float _moveX, float _moveZ, float x, float z, int type, Vector3[] _playerPositions)
     {
         time = _time;
         seconds = _seconds;
@@ -311,6 +320,8 @@ public class Action
         player = _player;
         Zpos = _Zpos;
         Xpos = _Xpos;
+        moveX = _moveX;
+        moveZ = _moveZ;
         xGrid = x;
         zGrid = z;
         hitType = type;
@@ -320,16 +331,18 @@ public class Action
 
 public class State
 {
+    public float role;
     public string time;
     public long seconds;
 
     public Vector3[] playerPositions;
     public Vector3 ballPosition;
 
-    public State(string _time, long _seconds, Vector3[] _playerPositions, Vector3 _ballPosition)
+    public State(string _time, long _seconds, float _role, Vector3[] _playerPositions, Vector3 _ballPosition)
     {
         time = _time;
         seconds = _seconds;
+        role = _role;
         playerPositions = _playerPositions;
         ballPosition = _ballPosition;
     }
@@ -337,21 +350,21 @@ public class State
 
 public class Logger
 {
-    private const int STEPS = 1000;  // save to disk every STEPS actions
+    private const int STEPS = 200;  // save to disk every STEPS actions
     public List<Action> actions = new List<Action>();
     public List<State> states = new List<State>();
-    public void LogAction(int team, int player, float Xtarget, float Ztarget, float xGrid, float zGrid, int hitType, Vector3[] playerPositions)
+    public void LogAction(int team, int player, float Xtarget, float Ztarget, float moveX, float moveZ, float xGrid, float zGrid, int hitType, Vector3[] playerPositions)
     {
-        actions.Add(new Action(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss.fff"), DateTimeOffset.Now.ToUnixTimeMilliseconds(), team, player, Xtarget, Ztarget, xGrid, zGrid, hitType, playerPositions));
+        actions.Add(new Action(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss.fff"), DateTimeOffset.Now.ToUnixTimeMilliseconds(), team, player, Xtarget, Ztarget, moveX, moveZ, xGrid, zGrid, hitType, playerPositions));
         if (actions.Count % STEPS == 0)
         {
             SaveActions();
         }
     }
 
-    public void LogState(Vector3[] playerPositions, Vector3 ballPosition)
+    public void LogState(float role, Vector3[] playerPositions, Vector3 ballPosition)
     {
-        states.Add(new State(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss.fff"), DateTimeOffset.Now.ToUnixTimeMilliseconds(), playerPositions, ballPosition));
+        states.Add(new State(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss.fff"), DateTimeOffset.Now.ToUnixTimeMilliseconds(), role, playerPositions, ballPosition));
         if (states.Count % STEPS == 0)
         {
             SaveStates();
@@ -367,7 +380,7 @@ public class Logger
         string[] rows = new string[actions.Count];
         for (int i = 0; i < actions.Count; i++)
         {
-            rows[i] = $"{actions[i].time};{actions[i].seconds};{actions[i].team};{actions[i].player % 2};{actions[i].Xpos};{actions[i].Zpos};{actions[i].xGrid};{actions[i].zGrid};{actions[i].hitType};";
+            rows[i] = $"{actions[i].time};{actions[i].seconds};{actions[i].team};{actions[i].player % 2};{actions[i].Xpos};{actions[i].Zpos};{actions[i].moveX};{actions[i].moveZ};{actions[i].xGrid};{actions[i].zGrid};{actions[i].hitType};";
             for (int j = 0; j < 4; j++)
             {
                 Vector3 p = actions[i].playerPositions[j];
@@ -384,6 +397,7 @@ public class Logger
         for (int i = 0; i < states.Count; i++)
         {
             rows[i] = $"{states[i].time};{states[i].seconds};";
+            rows[i] += $"{states[i].role};";
             for (int j = 0; j < 4; j++)
             {
                 Vector3 p = states[i].playerPositions[j];
