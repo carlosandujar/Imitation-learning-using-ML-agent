@@ -1,0 +1,48 @@
+{
+    "PadelAgent": {
+        "checkpoints": [
+            {
+                "steps": 499952,
+                "file_path": "results\\Test\\PadelAgent\\PadelAgent-499952.onnx",
+                "reward": 13.784408051716653,
+                "creation_time": 1741892488.4117632,
+                "auxillary_file_paths": [
+                    "results\\Test\\PadelAgent\\PadelAgent-499952.pt"
+                ]
+            },
+            {
+                "steps": 999940,
+                "file_path": "results\\Test\\PadelAgent\\PadelAgent-999940.onnx",
+                "reward": 19.335357112543925,
+                "creation_time": 1741893433.3373,
+                "auxillary_file_paths": [
+                    "results\\Test\\PadelAgent\\PadelAgent-999940.pt"
+                ]
+            },
+            {
+                "steps": 1009946,
+                "file_path": "results\\Test\\PadelAgent\\PadelAgent-1009946.onnx",
+                "reward": 20.114838653995143,
+                "creation_time": 1741893455.9429357,
+                "auxillary_file_paths": [
+                    "results\\Test\\PadelAgent\\PadelAgent-1009946.pt"
+                ]
+            }
+        ],
+        "elo": 1382.0228499143366,
+        "final_checkpoint": {
+            "steps": 1009946,
+            "file_path": "results\\Test\\PadelAgent.onnx",
+            "reward": 20.114838653995143,
+            "creation_time": 1741893455.9429357,
+            "auxillary_file_paths": [
+                "results\\Test\\PadelAgent\\PadelAgent-1009946.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.30.0",
+        "torch_version": "2.1.2+cpu"
+    }
+}
